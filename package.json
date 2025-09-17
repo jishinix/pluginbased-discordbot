@@ -1,0 +1,31 @@
+{
+  "name": "pluginbased-discordbot",
+  "version": "2.0.0",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "@types/puppeteer": "^7.0.4",
+    "@types/request": "^2.48.12",
+    "archiver": "^7.0.1",
+    "canvas": "^3.1.2",
+    "chart.js": "^4.4.8",
+    "discord.js": "^14.18.0",
+    "fs-extra": "^11.3.0",
+    "image-data-uri": "^2.0.1",
+    "moment": "^2.30.1",
+    "mysql2": "^3.12.0",
+    "node-fetch": "^3.3.2",
+    "puppeteer": "^24.3.0",
+    "request": "^2.88.2",
+    "sharp": "^0.33.5",
+    "short-uuid": "^4.2.2"
+  },
+  "devDependencies": {
+    "@types/archiver": "^6.0.3",
+    "@types/fs-extra": "^11.0.4",
+    "typescript": "^5.0.0"
+  }
+}

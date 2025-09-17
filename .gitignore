@@ -1,0 +1,8 @@
+# Verzeichnis mit Node-Modulen
+node_modules/
+
+# Spezieller Ordner für Emojis
+emojisave/
+
+# Build- oder Verteilungsordner
+dist/

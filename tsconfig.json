@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "target": "ES2020", // Zielt auf moderne JavaScript-Version ab
+    "module": "ESNext", // Verwende ES-Module (statt CommonJS)
+    "moduleResolution": "node", // Modulauflösung wie in Node.js
+    "esModuleInterop": true, // Ermöglicht den Import von CommonJS-Modulen wie ESM
+    "outDir": "./dist", // Zielordner für kompilierten JavaScript-Code
+    "rootDir": "./src", // Quellenordner für TypeScript-Dateien
+    "strict": true, // Strikte Typprüfung
+    "skipLibCheck": true, // Optional: Überspringt die Bibliotheksprüfung
+    "resolveJsonModule": true, // Falls du JSON-Dateien importieren möchtest
+    "declaration": true
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
