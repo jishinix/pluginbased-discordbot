@@ -1,0 +1,346 @@
+{
+    "guildId": "",
+    "embed": {
+        "colorDefault": "57313A",
+        "colorError": "FF0000",
+        "colorReady": "57f186",
+        "colorEdit": "FFD700",
+        "colorInfo": "2E7B8C",
+        "labelFooter": "powered by Jishinix"
+    },
+    "emojis": {
+        "check": "",
+        "error": "",
+        "softError": "",
+        "info": ""
+    },
+    "roles": {
+        "mod": "",
+        "admin": "",
+        "owner": ""
+    },
+    "channel": {},
+    "plugins": {
+        "DevTools": {
+            "deactivateCommand": [
+                "exec",
+                "mute",
+                "unmute"
+            ],
+            "pluginSettings": {}
+        },
+        "Utils": {
+            "deactivateCommand": [
+                "clear",
+                "clearto",
+                "transcript-max",
+                "transcript-span",
+                "role-multiple",
+                "transfer-messagespan"
+            ],
+            "pluginSettings": {}
+        },
+        "Analytics": {
+            "deactivateCommand": [
+                "analytics-activity",
+                "analytics-averagedayactivity",
+                "analytics-c-activity",
+                "analytics-c-averagedayactivity",
+                "analytics-retrospective"
+            ],
+            "pluginSettings": {
+                "allowedRoles": [],
+                "allowedUsers": [],
+                "startTrackingAt": ""
+            }
+        },
+        "Birthday": {
+            "deactivateCommand": [
+                "birthday",
+                "birthday-help",
+                "birthday-remember",
+                "birthday-remove",
+                "birthdays-next"
+            ],
+            "pluginSettings": {
+                "birthdayRoleId": "",
+                "birthdayChannelId": "",
+                "giveRoleTime": "6:0:0",
+                "removeRoleTime": "22:0:0",
+                "sendBirthdayMessageTime": "6:0:0"
+            }
+        },
+        "XpManager": {
+            "deactivateCommand": [
+                "xp-help",
+                "xp-rank",
+                "xp-rewards",
+                "xp-top"
+            ],
+            "pluginSettings": {
+                "xpCheat": 1,
+                "levelUpChannal": "",
+                "dontTracChat": [
+                    ""
+                ],
+                "dontTracVoices": [
+                    ""
+                ],
+                "startXpRole": "",
+                "roles": [
+                    {
+                        "level": 1,
+                        "roleId": "1300596095075881083",
+                        "color": "#ffe100"
+                    }
+                ]
+            }
+        },
+        "BumpReminder": {
+            "deactivateCommand": [],
+            "pluginSettings": {
+                "bumpRoleId": "",
+                "bumpChannelId": "",
+                "jsonPath": "",
+                "allowOtherMessages": true
+            }
+        },
+        "Verify": {
+            "deactivateCommand": [],
+            "pluginSettings": {
+                "unverifiedRoleId": "",
+                "verifiedRoleId": "",
+                "tosAndPp": "",
+                "welcomeModule": "joiningEmbedManager comment: erster Buchstabe muss klein"
+            }
+        },
+        "Ticket": {
+            "deactivateCommand": [],
+            "pluginSettings": {
+                "transcriptChannelId": "",
+                "parentCategoryId": "",
+                "initEmbedTitle": "",
+                "initEmbedDesc": ""
+            }
+        },
+        "Logger": {
+            "deactivateCommand": [],
+            "pluginSettings": {
+                "logChannelId": "",
+                "msgUpdate": true,
+                "msgDelete": true,
+                "memberAdd": true,
+                "memberRemove": true,
+                "memberBan": true,
+                "memberUnban": true,
+                "memberTimeout": true,
+                "changeNick": true,
+                "joinVoice": true,
+                "leaveVoice": true
+            }
+        },
+        "JoiningEmbedManager": {
+            "deactivateCommand": [],
+            "pluginSettings": {
+                "sendBannerChannelId": "",
+                "bannerPath": "",
+                "text": "willkommen ``{username}`` <@{userId}> auf {guildname}",
+                "title": "Willkommen",
+                "sendWelcomeByMemberJoin": true
+            }
+        },
+        "JoiningImageManager": {
+            "deactivateCommand": [],
+            "pluginSettings": {
+                "sendBannerChannelId": "",
+                "text": "",
+                "sendWelcomeByMemberJoin": false,
+                "backgroundImageSrc": "",
+                "tempBannerFolderPath": "",
+                "tempUserFolderPath": ""
+            }
+        },
+        "JoinRoles": {
+            "deactivateCommand": [],
+            "pluginSettings": {
+                "roles": [
+                    ""
+                ]
+            }
+        },
+        "Embedtexter": {
+            "deactivateCommand": [],
+            "pluginSettings": {
+                "baseEmbedPath": "",
+                "embedConfigToCopy": {
+                    "type": "info",
+                    "title": "Title",
+                    "content": "Content",
+                    "image": "imagename / in selben orderr wie embed id /assets/bild",
+                    "buttonLinks": [
+                        {
+                            "link": "https://discord.com/terms",
+                            "emogie": "🌝",
+                            "label": "Discord Terms of Service",
+                            "buttonStyle": "Link"
+                        },
+                        {
+                            "link": "https://discord.com/guidelines",
+                            "emogie": "🌝",
+                            "label": "Discord Guidelines",
+                            "buttonStyle": "Link"
+                        }
+                    ]
+                }
+            }
+        },
+        "ButtonRoles": {
+            "deactivateCommand": [],
+            "pluginSettings": {
+                "configPath": ""
+            }
+        },
+        "BoosterColorRoles": {
+            "deactivateCommand": [
+                "boostrolle"
+            ],
+            "pluginSettings": {
+                "boosterRoleId": "",
+                "boostChannelId": "",
+                "text": [
+                    ""
+                ]
+            }
+        },
+        "About": {
+            "deactivateCommand": [
+                "about"
+            ],
+            "pluginSettings": {
+                "introduceChannelId": "",
+                "roleProperties": [
+                    {
+                        "bez": "alter",
+                        "roles": [
+                            {
+                                "anzeige": "16-17",
+                                "id": ""
+                            }
+                        ]
+                    }
+                ]
+            }
+        },
+        "TicTacToe": {
+            "deactivateCommand": [
+                "tictactoe"
+            ],
+            "pluginSettings": {}
+        },
+        "TicTacChess": {
+            "deactivateCommand": [
+                "tictacchess",
+                "tictacchess-rules"
+            ],
+            "pluginSettings": {
+                "ejnone": "<:blank:1346884254440620043>",
+                "ejbb": "",
+                "ejbbl": "",
+                "ejbw": "",
+                "ejpb": "",
+                "ejpbl": "",
+                "ejpw": "",
+                "ejtb": "",
+                "ejtbl": "",
+                "ejtw": "",
+                "ejlb": "",
+                "ejlbl": "",
+                "ejlw": ""
+            }
+        },
+        "AnonymMessage": {
+            "deactivateCommand": [
+                "anonym-message"
+            ],
+            "pluginSettings": {
+                "allowedChannels": [
+                    ""
+                ],
+                "sendInChannel": ""
+            }
+        },
+        "SilentAlarm": {
+            "deactivateCommand": [],
+            "pluginSettings": {
+                "sendAlarmChannelId": ""
+            }
+        },
+        "Wiki": {
+            "deactivateCommand": [],
+            "pluginSettings": {
+                "commands": {
+                    "omega": {
+                        "name": "omega",
+                        "display": "Omega",
+                        "description": "infos zu Omegas",
+                        "subcommands": {
+                            "heat": {
+                                "name": "heat",
+                                "display": "Heat",
+                                "description": "infos zu der Heat",
+                                "options": {
+                                    "Wirkung": {
+                                        "name": "Wirkung",
+                                        "desc": "der text der wirkung"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "generell": {
+                        "name": "generell",
+                        "display": "Generell",
+                        "description": "infos zu Generell",
+                        "options": {
+                            "Wirkung": {
+                                "name": "Wirkung",
+                                "desc": "der text der wirkung"
+                            }
+                        }
+                    },
+                    "allgemein": {
+                        "name": "allgemein",
+                        "display": "Allgemeine Omegaverse Infos",
+                        "description": "allgemeine omega Infos",
+                        "desc": [
+                            ""
+                        ]
+                    }
+                }
+            }
+        },
+        "Char": {
+            "deactivateCommand": [
+                "char"
+            ],
+            "pluginSettings": {}
+        },
+        "JoinVoiceChat": {
+            "deactivateCommand": [],
+            "pluginSettings": {
+                "joinChannelIds": [
+                    ""
+                ]
+            }
+        },
+        "JoinBanManager": {
+            "deactivateCommand": [],
+            "pluginSettings": {
+                "accountExistingDays": -1,
+                "avatarRequired": false
+            }
+        }
+    },
+    "labelActivity": "",
+    "labelPlaying": ""
+}
