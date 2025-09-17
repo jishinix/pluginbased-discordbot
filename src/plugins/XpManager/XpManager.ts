@@ -18,7 +18,6 @@ interface roleSettings {
 
 export default class XpManager extends CommandPlugin {
     discordBot: DiscordBot;
-    xpCheat: number;
     levelUpChannal: string;
     dontTracVoices: string[];
     dontTracChat: string[];
@@ -40,7 +39,6 @@ export default class XpManager extends CommandPlugin {
         super(discordBot.settings.plugins.XpManager);
         this.discordBot = discordBot;
 
-        this.xpCheat = discordBot.settings.plugins.XpManager.pluginSettings.xpCheat;
         this.levelUpChannal = discordBot.settings.plugins.XpManager.pluginSettings.levelUpChannal;
         this.dontTracVoices = discordBot.settings.plugins.XpManager.pluginSettings.dontTracVoices;
         this.dontTracChat = discordBot.settings.plugins.XpManager.pluginSettings.dontTracChat
@@ -326,9 +324,6 @@ export default class XpManager extends CommandPlugin {
         `;
 
         let randVal = this.discordBot.botUtils.getRandomNumber(15, 40);
-        if (this.discordBot.botUtils.isDev(msg.author.id)) {
-            randVal = randVal * this.xpCheat;
-        }
         await this.discordBot.db.query(sql, [msg.author.id, this.discordBot.guild?.id, msg.author.id, randVal, this.discordBot.guild?.id, msg.author.id, this.ua_msg_name, this.discordBot.guild?.id, msg.author.id, msg.author.id, this.ua_msg_name, new Date().getTime(), this.discordBot.guild?.id]);
         this.checkForLevelUp();
     }
