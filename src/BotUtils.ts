@@ -149,32 +149,24 @@ export class BotUtils {
         return str.charAt(0).toUpperCase() + str.slice(1);
     }
 
-    // Gibt je nachdem was vorhanden ist denn N�chst passenden nick bzw username zur�ck.
     getnick(member: GuildMember | null, user: User | null = null) {
         if (member) {
-            // pr�ft ob der user f�r diesen server einen extra nick name festgelegt hat, falls nicht gibt er denn username des users zur�ck
             return this.uppercaseFirst(member.nickname !== null ? member.nickname : member.user.username);
         } else if (user) {
-            // falls der Member nicht mehr existerirt
-            // (z.B. user geleavt nachricht wird gel�scht)
             return this.uppercaseFirst(user.username);
         } else {
             return 'unbekannt';
         }
     }
 
-    // Gibt je nachdem was vorhanden ist denn N�chst passenden Avatar zur�ck
     getAvatar(member: GuildMember, user: User | null = null) {
         let avatarUrloptions: ImageURLOptions = { extension: 'png', size: 512 };
         if (member) {
-            // pr�ft ob der user f�r diesen server einen extra avatar festgelegt hat, falls nicht gibt er den Avatar des users zur�ck
             let avatar = member.avatarURL(avatarUrloptions);
             if (!avatar) avatar = member.user.avatarURL(avatarUrloptions);
             if (!avatar) avatar = 'https://discord.com/assets/529459de1dc4c2424a03.png';
             return avatar;
         } else if (user) {
-            // falls der Member nicht mehr existerirt
-            // (z.B. user geleavt nachricht wird gel�scht)
             let avatar = user.avatarURL(avatarUrloptions);
             if (!avatar) avatar = 'https://discord.com/assets/529459de1dc4c2424a03.png';
             return avatar;
@@ -196,7 +188,6 @@ export class BotUtils {
         }
     }
 
-    //generiert anhand eines InteractionTyps und einem Costom key einen callback fest. 
     generateInteractionCb(eventType: string, costumKey: string, cb: Function) {
         this.discordBot.addEventListener(`interaction-${eventType}-${costumKey}`, cb)
     }
@@ -713,7 +704,6 @@ export class BotUtils {
         `);
         htmlStream.end();
 
-        // ZIP-Archiv erstellen
         const zipFilePath = path.join(__dirname, `${folderName}.zip`);
         const output = fs.createWriteStream(zipFilePath);
         const archive = archiver("zip", { zlib: { level: 9 } });
