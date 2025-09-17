@@ -92,7 +92,7 @@ export class BotUtils {
     }
 
     isDev(userId: string) {
-        return this.discordBot.devIds.includes(userId);
+        return this.discordBot.settings.devIds.includes(userId);
     }
 
     prittyDate(date: Date, inclusiveTime: boolean = true) {

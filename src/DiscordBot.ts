@@ -58,6 +58,7 @@ export interface PlugginSetting {
 
 export interface SettingsOptions {
     guildId: string;
+    devIds: string[];
     embed: EmbedSettingsOptions;
     emojis: { [key: string]: string };
     roles: RolesSettingsOptions;
@@ -88,13 +89,11 @@ export class DiscordBot extends EventDispatcher {
     plugins: { [key: string]: any };
     commands: Map<string, CommandDataObject>;
     db: any;
-    devIds: string[] = [
-        '735016070112477194'
-    ];
-
 
     constructor(token: string, databaseOptions: DatabaseSettingsOptions, settings: SettingsOptions) {
         super();
+
+        if (!settings.devIds) settings.devIds = [];
 
         this.token = token;
 
