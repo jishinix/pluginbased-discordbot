@@ -322,12 +322,6 @@
                 }
             }
         },
-        "Char": {
-            "deactivateCommand": [
-                "char"
-            ],
-            "pluginSettings": {}
-        },
         "JoinVoiceChat": {
             "deactivateCommand": [],
             "pluginSettings": {
