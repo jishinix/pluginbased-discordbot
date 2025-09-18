@@ -282,7 +282,7 @@ export default class BoosterColorRoles extends CommandPlugin {
 
     async isBooster(member: GuildMember) {
         //return await this.discordBot.botUtils.hasRole(member.id, this.boosterRoleId)
-        return (await this.discordBot.botUtils.hasRole(member.id, this.boosterRoleId)) || member.id == '1094523805029896232';;
+        return await this.discordBot.botUtils.hasRole(member.id, this.boosterRoleId);
     }
 
     isValidHexCode(hex: string) {
