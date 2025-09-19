@@ -1,16 +1,15 @@
-
 import { createCanvas, loadImage, Image } from 'canvas';
-import {AttachmentBuilder, GuildChannel, GuildMember} from 'discord.js';
-import fs from'fs';
+import { AttachmentBuilder, GuildChannel, GuildMember } from 'discord.js';
+import fs from 'fs';
 import request from 'request';
 import sharp from 'sharp';
 import short from 'short-uuid';
 import puppeteer from 'puppeteer';
 import { DiscordBot } from '../../DiscordBot';
 import { homePath } from '../../dirname';
+import Plugin from '../../Plugin';
 
-export default class JoiningEmbedManager{
-    discordBot: DiscordBot;
+export default class JoiningEmbedManager extends Plugin {
     page: any;
     bannerPath?: string;
     sendBannerChannelId: string;
@@ -18,8 +17,9 @@ export default class JoiningEmbedManager{
     text: string;
     sendWelcomeByMemberJoin: boolean;
 
-    constructor(discordBot: DiscordBot){
-        this.discordBot = discordBot;
+    constructor(discordBot: DiscordBot) {
+        super(discordBot);
+
         this.page = null;
 
         this.bannerPath = this.discordBot.settings.plugins.JoiningEmbedManager.pluginSettings.bannerPath;
@@ -30,52 +30,52 @@ export default class JoiningEmbedManager{
 
 
         this.init();
-        
-        this.discordBot.addEventListener('event-guildMemberAdd',(member: GuildMember)=>{
-            if(this.sendWelcomeByMemberJoin){
+
+        this.discordBot.addEventListener('event-guildMemberAdd', (member: GuildMember) => {
+            if (this.sendWelcomeByMemberJoin) {
                 this.sendWelcomme(member);
             }
         })
-        
+
         console.log('JoiningBanner Manager Initialisiert.');
     }
 
-    async init(){
-        const browser = await puppeteer.launch({args: ['--no-sandbox']});
+    async init() {
+        const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
         this.page = await browser.newPage();
     }
 
-    async sendWelcomme(member: GuildMember){
-        
+    async sendWelcomme(member: GuildMember) {
+
         const channel = await this.discordBot.guild?.channels.fetch(this.sendBannerChannelId);
-        if(!(channel instanceof GuildChannel) || !('send' in channel) || typeof channel.send !== 'function') return;
-        try{
-            
+        if (!(channel instanceof GuildChannel) || !('send' in channel) || typeof channel.send !== 'function') return;
+        try {
+
             const joinembed = this.discordBot.defaultEmbeds.getDefaultEmbed('none');
             joinembed.setTitle(this.title);
             joinembed.setDescription([
                 this.text.replace(/{username}/g, this.discordBot.botUtils.getnick(member)).replace(/{userId}/g, member.user.id).replace(/{guildname}/g, member.guild.name),
             ].join('\n'))
 
-            if(this.bannerPath){
+            if (this.bannerPath) {
 
                 const file = new AttachmentBuilder(this.bannerPath, { name: 'lel.gif' });
 
                 joinembed.setImage(`attachment://lel.gif`);
-    
+
                 channel.send({
                     embeds: [joinembed], files: [file]
                 });
-            }else{
+            } else {
                 channel.send({
                     embeds: [joinembed]
                 });
             }
 
-        }catch(err){
+        } catch (err) {
             console.log(err);
             channel.send({
-                content: `Willkommen <@${member.user.id}> auf Backyard!`, 
+                content: `Willkommen <@${member.user.id}> auf Backyard!`,
             })
         }
     }

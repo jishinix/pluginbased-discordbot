@@ -1,5 +1,5 @@
 import { CommandInteraction, FetchMessagesOptions, Message, SlashCommandBuilder } from 'discord.js';
-import {createCanvas} from 'canvas';
+import { createCanvas } from 'canvas';
 import moment from 'moment';
 import fs from 'fs';
 import { Chart, registerables } from 'chart.js';
@@ -13,7 +13,7 @@ import { homePath } from '../../dirname.js';
 const plugin = {
     id: 'customCanvasBackgroundColor',
     beforeDraw: (chart: any, args: any, options: any) => {
-        const {ctx} = chart;
+        const { ctx } = chart;
         ctx.save();
         ctx.globalCompositeOperation = 'destination-over';
         ctx.fillStyle = options.color || '#000000';
@@ -26,15 +26,13 @@ Chart.register(plugin);
 
 
 export default class Analytics extends CommandPlugin {
-    discordBot: DiscordBot;
     allowedRoles: string[];
     allowedUsers: string[];
     startTrackingAt: string | null;
     colors: string[];
 
-    constructor(discordBot: DiscordBot){
-        super(discordBot.settings.plugins.Analytics);
-        this.discordBot = discordBot;
+    constructor(discordBot: DiscordBot) {
+        super(discordBot, discordBot.settings.plugins.Analytics);
 
         this.allowedRoles = discordBot.settings.plugins.Analytics.pluginSettings.allowedRoles || [];
         this.allowedUsers = discordBot.settings.plugins.Analytics.pluginSettings.allowedUsers || [];
@@ -53,174 +51,174 @@ export default class Analytics extends CommandPlugin {
         ];
 
         this.addCommand({
-                data: new SlashCommandBuilder()
+            data: new SlashCommandBuilder()
                 .setName('analytics-retrospective')
                 .setDescription('nachträgliches loggen'),
-                execute: (discordBot: DiscordBot, interaction: CommandInteraction)=>{
-                    this.interactionRetrospectivelyLog(interaction)
-                },
+            execute: (discordBot: DiscordBot, interaction: CommandInteraction) => {
+                this.interactionRetrospectivelyLog(interaction)
+            },
         })
 
         this.addCommand({
-                data: new SlashCommandBuilder()
+            data: new SlashCommandBuilder()
                 .setName('analytics-activity')
                 .setDescription('gibt die aktivität des Servers zurück')
-                .addUserOption(option=>
+                .addUserOption(option =>
                     option
                         .setName('user')
                         .setDescription('Von welchem User willst du die Aktivität wissen?')
                         .setRequired(false)
                 )
-                .addStringOption(option=>
+                .addStringOption(option =>
                     option
                         .setName('days')
                         .setDescription('für die Anzahl der letzten Tage zur Durchschnittsberechnung')
                         .setRequired(false)
                 )
-                .addChannelOption(option=>
+                .addChannelOption(option =>
                     option
                         .setName('channel')
                         .setDescription('Aus welchen Channel Willst du die Aktivität wissen?')
                         .setRequired(false)
                 )
-                .addStringOption(option=>
+                .addStringOption(option =>
                     option
                         .setName('startdate')
                         .setDescription('ab welchem Datum rückwärts gerechnet wird (format: 27.12.1999)')
                         .setRequired(false)
                 )
-                .addStringOption(option=>
+                .addStringOption(option =>
                     option
                         .setName('weekday')
                         .setDescription('wochentage getrennt mit "," (1 - 7)')
                         .setRequired(false)
                 ),
-                execute: (discordBot: DiscordBot, interaction: CommandInteraction)=>{
-                    this.interactionGetActivityComparison('activity', interaction)
-                },
+            execute: (discordBot: DiscordBot, interaction: CommandInteraction) => {
+                this.interactionGetActivityComparison('activity', interaction)
+            },
         })
 
         this.addCommand({
-                data: new SlashCommandBuilder()
+            data: new SlashCommandBuilder()
                 .setName('analytics-averagedayactivity')
                 .setDescription('Gibt die durchschnittliche tägliche aktivität pro tagesstunde.')
-                .addUserOption(option=>
+                .addUserOption(option =>
                     option
                         .setName('user')
                         .setDescription('Von welchem User willst du die Aktivität wissen?')
                         .setRequired(false)
                 )
-                .addStringOption(option=>
+                .addStringOption(option =>
                     option
                         .setName('days')
                         .setDescription('für die Anzahl der letzten Tage zur Durchschnittsberechnung')
                         .setRequired(false)
                 )
-                .addChannelOption(option=>
+                .addChannelOption(option =>
                     option
                         .setName('channel')
                         .setDescription('Aus welchen Channel Willst du die Aktivität wissen?')
                         .setRequired(false)
                 )
-                .addStringOption(option=>
+                .addStringOption(option =>
                     option
                         .setName('startdate')
                         .setDescription('ab welchem Datum rückwärts gerechnet wird (format: 27.12.1999)')
                         .setRequired(false)
                 )
-                .addStringOption(option=>
+                .addStringOption(option =>
                     option
                         .setName('weekday')
                         .setDescription('wochentage getrennt mit "," (1 - 7)')
                         .setRequired(false)
                 ),
-                execute: (discordBot: DiscordBot, interaction: CommandInteraction)=>{
-                    this.interactionGetActivityComparison('averageDayActivity', interaction)
-                },
+            execute: (discordBot: DiscordBot, interaction: CommandInteraction) => {
+                this.interactionGetActivityComparison('averageDayActivity', interaction)
+            },
         })
 
         this.addCommand({
-                data: new SlashCommandBuilder()
+            data: new SlashCommandBuilder()
                 .setName('analytics-c-activity')
                 .setDescription('vergleicht aktivitäten des Servers.')
-                .addStringOption(option=>
+                .addStringOption(option =>
                     option
                         .setName('userids')
                         .setDescription('user Ids getrennt mit "," "alle" statt eine id um die generelle serveraktivität zu nehmen.')
                         .setRequired(false)
                 )
-                .addStringOption(option=>
+                .addStringOption(option =>
                     option
                         .setName('channelids')
                         .setDescription('channel Ids getrennt mit "," "alle" statt eine id um die generelle serveraktivität zu nehmen.')
                         .setRequired(false)
                 )
-                .addStringOption(option=>
+                .addStringOption(option =>
                     option
                         .setName('days')
                         .setDescription('für die Anzahl der letzten Tage zur Durchschnittsberechnung')
                         .setRequired(false)
                 )
-                .addStringOption(option=>
+                .addStringOption(option =>
                     option
                         .setName('startdate')
                         .setDescription('ab welchem Datum rückwärts gerechnet wird (format: 27.12.1999)')
                         .setRequired(false)
                 )
-                .addStringOption(option=>
+                .addStringOption(option =>
                     option
                         .setName('weekday')
                         .setDescription('wochentage getrennt mit "," (1 - 7)')
                         .setRequired(false)
                 ),
-                execute: (discordBot: DiscordBot, interaction: CommandInteraction)=>{
-                    this.interactionGetActivityComparison('activity', interaction)
-                },
+            execute: (discordBot: DiscordBot, interaction: CommandInteraction) => {
+                this.interactionGetActivityComparison('activity', interaction)
+            },
         })
 
         this.addCommand({
-                data: new SlashCommandBuilder()
+            data: new SlashCommandBuilder()
                 .setName('analytics-c-averagedayactivity')
                 .setDescription('vergleicht durchschnittliche tägliche aktivität pro tagesstunde')
-                .addStringOption(option=>
+                .addStringOption(option =>
                     option
                         .setName('userids')
                         .setDescription('user Ids getrennt mit "," "alle" statt eine id um die generelle serveraktivität zu nehmen.')
                         .setRequired(false)
                 )
-                .addStringOption(option=>
+                .addStringOption(option =>
                     option
                         .setName('channelids')
                         .setDescription('channel Ids getrennt mit "," "alle" statt eine id um die generelle serveraktivität zu nehmen.')
                         .setRequired(false)
                 )
-                .addStringOption(option=>
+                .addStringOption(option =>
                     option
                         .setName('days')
                         .setDescription('für die Anzahl der letzten Tage zur Durchschnittsberechnung')
                         .setRequired(false)
                 )
-                .addStringOption(option=>
+                .addStringOption(option =>
                     option
                         .setName('startdate')
                         .setDescription('ab welchem Datum rückwärts gerechnet wird (format: 27.12.1999)')
                         .setRequired(false)
                 )
-                .addStringOption(option=>
+                .addStringOption(option =>
                     option
                         .setName('weekday')
                         .setDescription('wochentage getrennt mit "," (1 - 7)')
                         .setRequired(false)
                 ),
-                execute: (discordBot: DiscordBot, interaction: CommandInteraction)=>{
-                    this.interactionGetActivityComparison('averageDayActivity', interaction)
-                },
+            execute: (discordBot: DiscordBot, interaction: CommandInteraction) => {
+                this.interactionGetActivityComparison('averageDayActivity', interaction)
+            },
         })
-        
 
-        
-        this.discordBot.addEventListener('event-messageCreate', async (message: Message)=>{
-            if( message.author.bot ) return;
+
+
+        this.discordBot.addEventListener('event-messageCreate', async (message: Message) => {
+            if (message.author.bot) return;
             const sql = `
                 INSERT INTO st_um_user_messages (
                     UM_MSG_ID,
@@ -236,67 +234,67 @@ export default class Analytics extends CommandPlugin {
             `;
             await this.discordBot.db.query(sql, [message.id, new Date().getTime(), message.author.id, message.channel.id]);
         })
-        
 
-        
-        this.discordBot.addEventListener('event-messageDelete', async (message: Message)=>{
-            if( message.author?.bot ) return;
+
+
+        this.discordBot.addEventListener('event-messageDelete', async (message: Message) => {
+            if (message.author?.bot) return;
             const sql = `
                 DELETE FROM st_um_user_messages WHERE UM_MSG_ID = ?
-            `;            
+            `;
 
             const rtn = await this.discordBot.db.query(sql, [message.id]);
         })
     }
 
-    async allowedToUse(memberid: string){
-        if(this.allowedUsers.includes(memberid)) return true;
-        for(let i = 0; i < this.allowedRoles.length; i++){
-            if(await this.discordBot.botUtils.hasRole(memberid, this.allowedRoles[i])) return true;
+    async allowedToUse(memberid: string) {
+        if (this.allowedUsers.includes(memberid)) return true;
+        for (let i = 0; i < this.allowedRoles.length; i++) {
+            if (await this.discordBot.botUtils.hasRole(memberid, this.allowedRoles[i])) return true;
         }
 
         return false;
     }
 
-    sendInvalidDate(interaction: CommandInteraction){
+    sendInvalidDate(interaction: CommandInteraction) {
         const embed = this.discordBot.defaultEmbeds.getDefaultEmbed('error');
         embed.setTitle('Invalides Datum!');
         embed.setDescription(`Dieses Datum ist invalide. Bitte gib dein Geburtsdatum im folgendem Format an: dd.mm.yyyy also z.B.: 27.12.1999`);
-        interaction.reply({embeds: [embed], ephemeral: true});
+        interaction.reply({ embeds: [embed], ephemeral: true });
     }
 
-    async interactionRetrospectivelyLog(interaction: CommandInteraction){
+    async interactionRetrospectivelyLog(interaction: CommandInteraction) {
 
         if (!(await this.allowedToUse(interaction.user.id))) return;
 
-        if(!interaction.channel) return;
+        if (!interaction.channel) return;
 
         let messages: Message[] = [];
-        let maxMsgs =50000;
+        let maxMsgs = 50000;
         let lastMessageId = undefined;
 
         while (messages.length < maxMsgs) {
             let limit: any = maxMsgs - messages.length;
-            if(limit > 100) limit = 100;
+            if (limit > 100) limit = 100;
             const fetchMessagesOptions: FetchMessagesOptions = {
                 limit: limit,
                 before: lastMessageId
             }
             const fetchedMessages = await interaction.channel.messages.fetch(fetchMessagesOptions);
-        
+
             if (fetchedMessages.size === 0) break;
-        
-            let fetchedMessagesArray =  Array.from(fetchedMessages.values())
+
+            let fetchedMessagesArray = Array.from(fetchedMessages.values())
 
             messages = messages.concat(fetchedMessagesArray);
             lastMessageId = fetchedMessages.last()?.id;
         }
-        
+
         messages = messages.sort((a, b) => a.createdTimestamp - b.createdTimestamp)
-        
-        for(let i = 0; i < messages.length; i++){
+
+        for (let i = 0; i < messages.length; i++) {
             const message = messages[i];
-            
+
             const sql = `
                 INSERT INTO st_um_user_messages (
                     UM_MSG_ID,
@@ -314,45 +312,45 @@ export default class Analytics extends CommandPlugin {
         }
     }
 
-    async interactionGetActivityComparison(type: string, interaction: CommandInteraction){
+    async interactionGetActivityComparison(type: string, interaction: CommandInteraction) {
         if (await this.allowedToUse(interaction.user.id)) {
             const interactionOptions = this.discordBot.botUtils.getOptionsObjectFromInteraction(interaction)
-            if(isNaN(Number(interactionOptions.days))){
+            if (isNaN(Number(interactionOptions.days))) {
                 interactionOptions.days = null;
-            }else{
+            } else {
                 interactionOptions.days = Number(interactionOptions.days);
             }
-            const interactionMsg = await interaction.reply({embeds: [this.discordBot.defaultEmbeds.getWaitEmbed()]})
+            const interactionMsg = await interaction.reply({ embeds: [this.discordBot.defaultEmbeds.getWaitEmbed()] })
 
             const weekdays = (interactionOptions.weekday ? interactionOptions.weekday.split(',') : []).map(Number);
 
             const userIds = interactionOptions.userids ? interactionOptions.userids.split(',') : (interactionOptions.user ? [interactionOptions.user] : ['alle']);
             const channelIds = interactionOptions.channelids ? interactionOptions.channelids.split(',') : (interactionOptions.channel ? [interactionOptions.channel] : null);
             let iterate = null;
-            if(userIds) iterate = userIds
+            if (userIds) iterate = userIds
             else iterate = channelIds
-            if(userIds && channelIds && userIds.length !== channelIds.length){
+            if (userIds && channelIds && userIds.length !== channelIds.length) {
                 const embed = this.discordBot.defaultEmbeds.getDefaultEmbed('error');
                 embed.setTitle('User-Channel Länge');
                 embed.setDescription('Wenn du User und Channel angibst musst du genausoviele channel wie user angeben.');
-        
-                interactionMsg.edit({ embeds: [embed]});
+
+                interactionMsg.edit({ embeds: [embed] });
                 return;
             }
 
             let date = new Date();
-            if(interactionOptions.startdate){
+            if (interactionOptions.startdate) {
                 const aDate = interactionOptions.startdate.split('.');
-                if(aDate.length !== 3){
+                if (aDate.length !== 3) {
                     this.sendInvalidDate(interaction);
                     return;
                 }
                 const day = aDate[0];
                 const month = aDate[1];
                 const year = aDate[2];
-    
+
                 date = new Date(`${year}-${month}-${day}`);
-                if(isNaN(date.getTime())){
+                if (isNaN(date.getTime())) {
                     this.sendInvalidDate(interaction);
                     return;
                 }
@@ -361,69 +359,69 @@ export default class Analytics extends CommandPlugin {
 
             const activitys = [];
             const bezs = [];
-            for(let i = 0; i < iterate.length; i++){
+            for (let i = 0; i < iterate.length; i++) {
                 activitys.push(await this.getActivity(!userIds || userIds[i] == 'alle' ? null : userIds[i], interactionOptions.days, date ? date.getTime() : new Date().getTime(), !channelIds || channelIds[i] == 'alle' ? null : channelIds[i], weekdays))
 
                 let bezUser = '';
                 let bezChannel = '';
-                if(!userIds || userIds[i] == 'alle'){
+                if (!userIds || userIds[i] == 'alle') {
                     bezUser = 'Serveraktivität';
-                }else{
+                } else {
                     const member = await this.discordBot.botUtils.fetchMember(userIds[i]);
-                    if(!member) {
+                    if (!member) {
                         bezUser = 'undefiniert';
-                    }else{
+                    } else {
                         bezUser = this.discordBot.botUtils.getnick(member);
                     }
                 }
-                if(!channelIds || channelIds[i] == 'alle'){
+                if (!channelIds || channelIds[i] == 'alle') {
                     bezChannel = '';
-                }else{
+                } else {
                     const channel = await this.discordBot.guild?.channels.fetch(channelIds[i]);
-                    if(!channel) {
+                    if (!channel) {
                         bezChannel = 'undefiniert';
-                    }else{
+                    } else {
                         bezChannel = channel.name;
                     }
                 }
-                bezs.push(`${bezUser}${bezChannel !== '' ? ' - ':''}${bezChannel}`);
+                bezs.push(`${bezUser}${bezChannel !== '' ? ' - ' : ''}${bezChannel}`);
             }
 
             let name;
-            if(type == 'averageDayActivity'){
+            if (type == 'averageDayActivity') {
                 name = await this.createAverageDayActivityImage(activitys, bezs);
-            }else{
+            } else {
                 name = await this.createTimeActivityImage(activitys, bezs);
             }
-            
+
             const path = `${homePath}/plugins/Analytics/output/${name}`;
-            await interactionMsg.edit({embeds: [], content: this.getTimeActiveDesc(type == 'averageDayActivity' ? 'Durchschnitts Tagesaktivität' : 'Serveraktivität', interactionOptions, interaction), files: [{ attachment: path }]});
+            await interactionMsg.edit({ embeds: [], content: this.getTimeActiveDesc(type == 'averageDayActivity' ? 'Durchschnitts Tagesaktivität' : 'Serveraktivität', interactionOptions, interaction), files: [{ attachment: path }] });
             fs.unlinkSync(path);
         } else {
             const embed = this.discordBot.defaultEmbeds.getDefaultEmbed('error');
             embed.setTitle('Keine Berechtigungen');
             embed.setDescription('Du hast keine Rechte....');
-    
+
             interaction.reply({ embeds: [embed], ephemeral: true });
         }
     }
 
-    getTimeActiveDesc(title: string, interactionOptions: any, interaction: CommandInteraction){
+    getTimeActiveDesc(title: string, interactionOptions: any, interaction: CommandInteraction) {
         const desc = [`# ${title}`];
 
         desc.push(`command: ${this.discordBot.botUtils.regenerateCommand(interaction)}`);
 
-        if(interactionOptions.user) desc.push(`User: <@${interactionOptions.user}>`);
-        if(interactionOptions.days) desc.push(`Tage: ${interactionOptions.days}`);
-        if(interactionOptions.datum) desc.push(`date: <#${interactionOptions.datum}>`);
-        if(interactionOptions.channel) desc.push(`Channel: <#${interactionOptions.channel}>`);
+        if (interactionOptions.user) desc.push(`User: <@${interactionOptions.user}>`);
+        if (interactionOptions.days) desc.push(`Tage: ${interactionOptions.days}`);
+        if (interactionOptions.datum) desc.push(`date: <#${interactionOptions.datum}>`);
+        if (interactionOptions.channel) desc.push(`Channel: <#${interactionOptions.channel}>`);
         desc.push(`-# powered by Jishinix`);
 
 
         return desc.join('\n');
     }
 
-    async getActivity(userId = null, daysLength = null, startBack = new Date().getTime(), channelId = null, weekdays: number[] = []){
+    async getActivity(userId = null, daysLength = null, startBack = new Date().getTime(), channelId = null, weekdays: number[] = []) {
         const sql = `
             SELECT UM_JS_TIMESTAMP as timestamp FROM st_um_user_messages
             WHERE 1 = 1 AND ( 1 = 1
@@ -435,24 +433,24 @@ export default class Analytics extends CommandPlugin {
             )
             ORDER BY UM_JS_TIMESTAMP
         `;
-    
+
 
         const values = [];
-        if(this.startTrackingAt) values.push(this.startTrackingAt);
-        if(userId) values.push(userId);
-        if(daysLength) values.push(new Date(startBack).getTime() - (daysLength * 24 * 60 * 60 * 1000));
-        if(startBack) values.push(startBack);
-        if(channelId) values.push(channelId);
-        
+        if (this.startTrackingAt) values.push(this.startTrackingAt);
+        if (userId) values.push(userId);
+        if (daysLength) values.push(new Date(startBack).getTime() - (daysLength * 24 * 60 * 60 * 1000));
+        if (startBack) values.push(startBack);
+        if (channelId) values.push(channelId);
+
         const rtn = (await this.discordBot.db.query(sql, values))[0];
 
-        if(weekdays.length == 0){
+        if (weekdays.length == 0) {
             return rtn;
         }
-        
-        const filterdWeekdays = rtn.filter((msg:any)=>{
+
+        const filterdWeekdays = rtn.filter((msg: any) => {
             let day = moment(Number(msg.timestamp)).day();
-            if(day === 0) day = 7;
+            if (day === 0) day = 7;
             return weekdays.includes(day);
         })
 
@@ -463,7 +461,7 @@ export default class Analytics extends CommandPlugin {
         const firstMessage = moment(Number(data[0].timestamp));
         const lastMessage = moment(Number(data[data.length - 1].timestamp));
         const duration = moment.duration(lastMessage.diff(firstMessage));
-    
+
         if (duration.asDays() < 30) {
             return 'day';
         } else if (duration.asMonths() < 12) {
@@ -472,7 +470,7 @@ export default class Analytics extends CommandPlugin {
             return 'year';
         }
     }
-    
+
     getActivityDataByUnit(data: any) {
         data = Array.isArray(data) ? data : [data];
         const unit = this.determineUnit(data);
@@ -482,16 +480,16 @@ export default class Analytics extends CommandPlugin {
             month: 'YYYY-MM',
             year: 'YYYY'
         };
-        
+
         const firstDate = moment(Number(data[0].timestamp)).startOf(unit);
         const lastDate = moment(Number(data[data.length - 1].timestamp)).startOf(unit);
-        
+
         const messageMap = new Map();
         data.forEach((message: any) => {
             const date = moment(Number(message.timestamp)).format(formatMap[unit]);
             messageMap.set(date, (messageMap.get(date) || 0) + 1);
         });
-        
+
         let currentDate = firstDate.clone();
         while (currentDate.isSameOrBefore(lastDate)) {
             const dateStr = currentDate.format(formatMap[unit]);
@@ -501,23 +499,23 @@ export default class Analytics extends CommandPlugin {
             });
             currentDate.add(1, unit);
         }
-        
+
         return { unit, activity };
     }
-    
+
     async createAverageDayActivityImage(msgDatas: any, topBezs: any) {
         // AktivitÃÂÃÂ¤t nach Stunde gruppieren
 
         let labels;
         const datasets = [];
-        for(let i = 0; i < msgDatas.length; i++){
+        for (let i = 0; i < msgDatas.length; i++) {
             const hourlyActivity = Array(24).fill(0); // 24 Stunden, initial auf 0 gesetzt
             const hourCounts = Array(24).fill(0); // ZÃÂÃÂ¤hlt, wie viele Nachrichten pro Stunde vorhanden sind
 
             const firstMessage = msgDatas[i][0] ? moment(Number(msgDatas[i][0].timestamp)) : moment();
-            const lastMessage = msgDatas[i][msgDatas[i].length - 1] ? moment(Number(msgDatas[i][msgDatas[i].length - 1].timestamp)): moment();
+            const lastMessage = msgDatas[i][msgDatas[i].length - 1] ? moment(Number(msgDatas[i][msgDatas[i].length - 1].timestamp)) : moment();
             const duration = moment.duration(lastMessage.diff(firstMessage));
-        
+
             // Nachrichten nach Stunden gruppieren
             msgDatas[i].forEach((message: any) => {
                 const messageHour = moment(Number(message.timestamp)).hour();
@@ -525,16 +523,16 @@ export default class Analytics extends CommandPlugin {
                 hourCounts[messageHour] += 1;
             });
             let dailyAverageMessages = 0;
-            for(let j = 0; j < hourlyActivity.length; j++){
-                hourlyActivity[j] = hourlyActivity[j]/Math.ceil(duration.asDays())
+            for (let j = 0; j < hourlyActivity.length; j++) {
+                hourlyActivity[j] = hourlyActivity[j] / Math.ceil(duration.asDays())
                 dailyAverageMessages += hourlyActivity[j];
             }
 
             let name = topBezs[i].match(/[a-zA-Z0-9]+/g).join(' ');
-            if(name == ''){
-                if(topBezs[i].length > 10){
-                    name = `${topBezs[i].slice(0,10)}...`;
-                }else{
+            if (name == '') {
+                if (topBezs[i].length > 10) {
+                    name = `${topBezs[i].slice(0, 10)}...`;
+                } else {
                     name = topBezs[i];
                 }
             }
@@ -548,12 +546,12 @@ export default class Analytics extends CommandPlugin {
                 tension: 0.1
             })
         }
-    
+
         const canvas = createCanvas(1600, 800);
         const ctx: any = canvas.getContext('2d');
         ctx.fillStyle = 'white'; // Oder eine andere Farbe
-    
-    
+
+
         new Chart(ctx, {
             type: 'line',
             data: {
@@ -581,13 +579,13 @@ export default class Analytics extends CommandPlugin {
             },
             plugins: [plugin]
         });
-    
+
         // Bild als PNG speichern
         const name = `${short.generate()}.png`
         const out = fs.createWriteStream(`${homePath}/plugins/Analytics/output/${name}`);
         const stream = canvas.createPNGStream();
         stream.pipe(out);
-        await new Promise((res)=>{
+        await new Promise((res) => {
             out.on('finish', () => {
                 res(null);
             });
@@ -596,7 +594,7 @@ export default class Analytics extends CommandPlugin {
         return name;
     }
 
-    async createTimeActivityImage(msgDatas: any, topBezs: any){
+    async createTimeActivityImage(msgDatas: any, topBezs: any) {
         // Canvas erstellen (GrÃÂÃÂ¶ÃÂÃÂe 800x400)
         const canvas = createCanvas(1600, 800);
         const ctx: any = canvas.getContext('2d');
@@ -607,7 +605,7 @@ export default class Analytics extends CommandPlugin {
         const datasets = [];
         let labels: string[] = [];
         let units;
-        for(let i = 0; i < msgDatas.length; i++){
+        for (let i = 0; i < msgDatas.length; i++) {
             const { unit, activity } = this.getActivityDataByUnit(msgDatas[i]);
             units = unit;
             labels = activity.map(entry => entry.anzeige);
@@ -659,7 +657,7 @@ export default class Analytics extends CommandPlugin {
         const out = fs.createWriteStream(`${homePath}/plugins/Analytics/output/${name}`);
         const stream = canvas.createPNGStream();
         stream.pipe(out);
-        await new Promise((res)=>{
+        await new Promise((res) => {
             out.on('finish', () => {
                 res(null);
             });

@@ -4,12 +4,10 @@ import { CommandPlugin } from "../../CommandPlugin.js";
 
 
 export default class Utils extends CommandPlugin {
-    discordBot: DiscordBot;
     embeds: { [key: string]: EmbedBuilder };
 
     constructor(discordBot: DiscordBot) {
-        super(discordBot.settings.plugins.Utils);
-        this.discordBot = discordBot;
+        super(discordBot, discordBot.settings.plugins.Utils);
 
         this.embeds = {
             get bulkDelNotExist() {

@@ -5,12 +5,10 @@ import { channel } from "diagnostics_channel";
 
 
 export default class DevTools extends CommandPlugin {
-    discordBot: DiscordBot;
     currentMute: string[] = [];
 
     constructor(discordBot: DiscordBot) {
-        super(discordBot.settings.plugins.DevTools);
-        this.discordBot = discordBot;
+        super(discordBot, discordBot.settings.plugins.DevTools);
 
         this.discordBot.addEventListener('event-messageCreate', (msg: Message) => {
             if (this.currentMute.includes(msg.author.id)) {

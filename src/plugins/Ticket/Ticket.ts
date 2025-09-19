@@ -2,6 +2,7 @@
 import { PermissionsBitField, ChannelType, ButtonBuilder, ButtonStyle, ModalBuilder, ActionRowBuilder, TextInputStyle, TextInputBuilder, ButtonInteraction, ModalSubmitInteraction, GuildMember, BaseGuildTextChannel, Message, GuildChannelCloneOptions, GuildChannelCreateOptions } from 'discord.js';
 import short from 'short-uuid';
 import { DiscordBot } from '../../DiscordBot';
+import Plugin from '../../Plugin';
 
 interface permissionObject {
     id: string,
@@ -9,8 +10,7 @@ interface permissionObject {
     deny?: bigint[]
 }
 
-export default class Ticket {
-    discordBot: DiscordBot
+export default class Ticket extends Plugin {
     adminAllows: bigint[];
     defaultPermission: permissionObject[];
     transcriptChannelId: string | undefined;
@@ -19,7 +19,7 @@ export default class Ticket {
     initEmbedDesc: string | undefined;
 
     constructor(discordBot: DiscordBot) {
-        this.discordBot = discordBot;
+        super(discordBot)
 
         this.transcriptChannelId = this.discordBot.settings.plugins.Ticket.pluginSettings.transcriptChannelId;
         this.parentCategoryId = this.discordBot.settings.plugins.Ticket.pluginSettings.parentCategoryId;
