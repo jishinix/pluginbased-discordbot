@@ -7,6 +7,7 @@ import { PageModulManager } from './PageModulManager.js';
 import createDB from './DB.js';
 import { homePath } from "./dirname.js";
 import path from "path";
+import DiscordAPIClient from './clients/DiscordAPIClient.js';
 
 const eventNames = [
     'guildBanAdd',
@@ -128,7 +129,7 @@ export class DiscordBot extends EventDispatcher {
         const plugins = Object.keys(this.settings.plugins);
 
         for (let i = 0; i < plugins.length; i++) {
-            const pluginPath = path.join(homePath, 'plugins', plugins[i], plugins[i]);
+            const pluginPath = path.join(homePath, 'plugins', plugins[i], `${plugins[i]}.js`);
             const pluginName = plugins[i].slice(0, 1).toLowerCase() + plugins[i].slice(1, plugins[i].length);
             if (!fs.existsSync(pluginPath)) continue;
 
@@ -201,26 +202,14 @@ export class DiscordBot extends EventDispatcher {
             this.instance?.on(eventNames[i], (...args: any[]) => { this.dispatchEvent(`event-${eventNames[i]}`, new Array(...args)) });
         }
         this.instance?.once('ready', async () => {
-            await this.registerInstanceAttributes();
+            await DiscordAPIClient.registerInstanceAttributes(this);
         });
     }
 
     initInteractionHandler() {
         this.instance?.on('interactionCreate', async (interaction: Interaction) => {
             try {
-                if (!interaction.guild) {
-                    if ('reply' in interaction) interaction.reply('Das geht nur auf Servern.');
-                    return;
-                }
-
-                if (interaction.isAutocomplete()) {
-                    this.handleInteractionAutocomplete(interaction);
-                } else if (interaction.isChatInputCommand()) {
-                    this.handleInteracitionChatinputCommand(interaction);
-                } else {
-                    this.handleComponentInteraction(interaction);
-                }
-
+                this.processInteraction(interaction);
             } catch (err) {
                 console.log(err);
 
@@ -228,6 +217,22 @@ export class DiscordBot extends EventDispatcher {
                 if ('reply' in interaction) interaction.reply({ embeds: [errorEmbed], ephemeral: true })
             }
         });
+    }
+
+    processInteraction(interaction: Interaction) {
+        if (!interaction.guild) {
+            if ('reply' in interaction) interaction.reply('Das geht nur auf Servern.');
+            return;
+        }
+
+        if (interaction.isAutocomplete()) {
+            this.handleInteractionAutocomplete(interaction);
+        } else if (interaction.isChatInputCommand()) {
+            this.handleInteracitionChatinputCommand(interaction);
+        } else {
+            this.handleComponentInteraction(interaction);
+        }
+
     }
 
     handleInteractionAutocomplete(interaction: AutocompleteInteraction) {
@@ -254,44 +259,25 @@ export class DiscordBot extends EventDispatcher {
     }
 
     handleComponentInteraction(interaction: Interaction) {
-        let interactionType;
-        if (interaction.type === InteractionType.ModalSubmit) {
-            interactionType = 'modal';
-        } else if (interaction.isButton()) {
-            interactionType = 'buttons';
-        } else if (interaction.isStringSelectMenu()) {
-            interactionType = 'selects';
-        } else if (interaction.isUserContextMenuCommand()) {
-            interactionType = 'userContext';
-        }
-        else {
-            throw new Error('kein interaction type greift.')
-        }
+        const interactionType = this.getInteractionType(interaction);
+
         const options = ('customId' in interaction) ? interaction.customId.split('-') : [];
         const name = options.splice(0, 1);
         this.dispatchEvent(`interaction-${interactionType}-${name}`, [this, interaction, options]);
     }
 
-    async registerInstanceAttributes() {
-        if (!this.instance || !this.instance.user) return;
-
-        this.instance.user.setActivity({
-            name: this.settings.labelActivity,
-            type: ActivityType.Playing
-        });
-
-        const rest = new REST().setToken(this.token);
-        const commands: SlashCommandBuilder[] = [];
-
-        this.commands.forEach(cmd => {
-            commands.push(cmd.data);
-        });
-
-        try {
-            await rest.put(Routes.applicationCommands(this.instance.user.id), { body: commands }).catch(err => console.error(err));
-        } catch (err) {
-            console.error(err);
+    getInteractionType(interaction: Interaction) {
+        if (interaction.type === InteractionType.ModalSubmit) {
+            return 'modal';
+        } else if (interaction.isButton()) {
+            return 'buttons';
+        } else if (interaction.isStringSelectMenu()) {
+            return 'selects';
+        } else if (interaction.isUserContextMenuCommand()) {
+            return 'userContext';
         }
-        this.dispatchEvent(`event-ready`, new Array(this))
+        else {
+            throw new Error('kein interaction type greift.')
+        }
     }
 }
