@@ -1,16 +1,16 @@
 import { ButtonBuilder, ButtonStyle, ModalBuilder, ActionRowBuilder, TextInputStyle, TextInputBuilder, GuildMember, Role, ButtonInteraction, ModalSubmitInteraction, Message } from 'discord.js';
 import { DiscordBot } from '../../DiscordBot';
+import Plugin from '../../Plugin';
 
 
-export default class Verify {
-    discordBot: DiscordBot;
+export default class Verify extends Plugin {
     unverifiedRoleId: string | undefined;
     verifiedRoleId: string | undefined;
     tosAndPp: string;
     welcomeModule: string | undefined;
 
     constructor(discordBot: DiscordBot) {
-        this.discordBot = discordBot;
+        super(discordBot);
 
         this.unverifiedRoleId = this.discordBot.settings.plugins.Verify.pluginSettings.unverifiedRoleId;
         this.verifiedRoleId = this.discordBot.settings.plugins.Verify.pluginSettings.verifiedRoleId;

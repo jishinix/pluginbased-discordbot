@@ -1,8 +1,9 @@
 import fs from 'fs';
-import { DiscordBot } from '../../DiscordBot';
+import { DiscordBot } from '../../DiscordBot.js';
 import { GuildChannel, Message, MessageReaction, User } from 'discord.js';
+import Plugin from '../../Plugin.js';
 
-interface ConfigStructure{
+interface ConfigStructure {
     type: "multible" | "clearly";
     title: string;
     description: string[];
@@ -13,54 +14,53 @@ interface ConfigStructure{
     msgIds?: string[];
 }
 
-export default class ButtonRoles{
-    discordBot: DiscordBot;
-    config: {[key: string]: ConfigStructure};
+export default class ButtonRoles extends Plugin {
+    config: { [key: string]: ConfigStructure };
 
-    constructor(discordBot: DiscordBot){
-        this.discordBot = discordBot;
+    constructor(discordBot: DiscordBot) {
+        super(discordBot);
 
         this.config = JSON.parse(fs.readFileSync(this.discordBot.settings.plugins.ButtonRoles.pluginSettings.configPath).toString());
 
-        
 
-        this.discordBot.addEventListener('event-messageReactionRemove',async (reaction: MessageReaction, user: User)=>{
-            if(user.bot) return; 
+
+        this.discordBot.addEventListener('event-messageReactionRemove', async (reaction: MessageReaction, user: User) => {
+            if (user.bot) return;
             const questIds = Object.keys(this.config)
-            for(let i = 0; i < questIds.length; i++){
+            for (let i = 0; i < questIds.length; i++) {
                 const cQ = this.config[questIds[i]];
-                if(cQ.msgIds){
-                    if(cQ.msgIds.includes(reaction.message.id)){
-                        switch(cQ.type){
+                if (cQ.msgIds) {
+                    if (cQ.msgIds.includes(reaction.message.id)) {
+                        switch (cQ.type) {
                             case "clearly":
-                                await (async ()=>{
+                                await (async () => {
                                     let found = false;
-                                    for(let optionIndex = 0; optionIndex < cQ.options.length; optionIndex++){
+                                    for (let optionIndex = 0; optionIndex < cQ.options.length; optionIndex++) {
                                         let foundInThisOption = false;
-                                        if((cQ.options[optionIndex].icon.startsWith('<') && reaction.emoji.name === cQ.options[optionIndex].icon.split(':')[1]) || reaction.emoji.name === cQ.options[optionIndex].icon){
+                                        if ((cQ.options[optionIndex].icon.startsWith('<') && reaction.emoji.name === cQ.options[optionIndex].icon.split(':')[1]) || reaction.emoji.name === cQ.options[optionIndex].icon) {
                                             found = true;
                                             foundInThisOption = true;
-                                            for(let roleIndex = 0; roleIndex < cQ.options[optionIndex].roles.length; roleIndex++){
+                                            for (let roleIndex = 0; roleIndex < cQ.options[optionIndex].roles.length; roleIndex++) {
                                                 const cRole = await this.discordBot.guild?.roles.fetch(cQ.options[optionIndex].roles[roleIndex]);
                                                 const member = await this.discordBot.botUtils.fetchMember(user.id);
-                                                if(member && cRole) try{await member.roles.remove(cRole)}catch(e){console.log(e)}
+                                                if (member && cRole) try { await member.roles.remove(cRole) } catch (e) { console.log(e) }
                                             }
                                         }
                                     }
                                 })()
                                 break;
                             case "multible":
-                                await (async()=>{
+                                await (async () => {
                                     let found = false;
-                                    for(let optionIndex = 0; optionIndex < cQ.options.length; optionIndex++){
+                                    for (let optionIndex = 0; optionIndex < cQ.options.length; optionIndex++) {
                                         let foundInThisOption = false;
-                                        if((cQ.options[optionIndex].icon.startsWith('<') && reaction.emoji.name === cQ.options[optionIndex].icon.split(':')[1]) || reaction.emoji.name === cQ.options[optionIndex].icon){
+                                        if ((cQ.options[optionIndex].icon.startsWith('<') && reaction.emoji.name === cQ.options[optionIndex].icon.split(':')[1]) || reaction.emoji.name === cQ.options[optionIndex].icon) {
                                             found = true;
                                             foundInThisOption = true;
-                                            for(let roleIndex = 0; roleIndex < cQ.options[optionIndex].roles.length; roleIndex++){
+                                            for (let roleIndex = 0; roleIndex < cQ.options[optionIndex].roles.length; roleIndex++) {
                                                 const cRole = await this.discordBot.guild?.roles.fetch(cQ.options[optionIndex].roles[roleIndex]);
                                                 const member = await this.discordBot.botUtils.fetchMember(user.id);
-                                                if(member && cRole) try{await member.roles.remove(cRole)}catch(e){console.log(e)}
+                                                if (member && cRole) try { await member.roles.remove(cRole) } catch (e) { console.log(e) }
                                             }
                                         }
                                     }
@@ -75,66 +75,66 @@ export default class ButtonRoles{
         })
 
 
-        this.discordBot.addEventListener('event-messageReactionAdd',async (reaction: MessageReaction, user: User)=>{
-            if(user.bot) return; 
+        this.discordBot.addEventListener('event-messageReactionAdd', async (reaction: MessageReaction, user: User) => {
+            if (user.bot) return;
             const questIds = Object.keys(this.config)
-            for(let i = 0; i < questIds.length; i++){
+            for (let i = 0; i < questIds.length; i++) {
                 const cQ = this.config[questIds[i]];
-                if(cQ.msgIds){
-                    if(cQ.msgIds.includes(reaction.message.id)){
-                        switch(cQ.type){
+                if (cQ.msgIds) {
+                    if (cQ.msgIds.includes(reaction.message.id)) {
+                        switch (cQ.type) {
                             case "clearly":
-                                await (async ()=>{
+                                await (async () => {
                                     let found = false;
-                                    for(let optionIndex = 0; optionIndex < cQ.options.length; optionIndex++){
+                                    for (let optionIndex = 0; optionIndex < cQ.options.length; optionIndex++) {
                                         let foundInThisOption = false;
-                                        if((cQ.options[optionIndex].icon.startsWith('<') && reaction.emoji.name === cQ.options[optionIndex].icon.split(':')[1]) || reaction.emoji.name === cQ.options[optionIndex].icon){
+                                        if ((cQ.options[optionIndex].icon.startsWith('<') && reaction.emoji.name === cQ.options[optionIndex].icon.split(':')[1]) || reaction.emoji.name === cQ.options[optionIndex].icon) {
                                             found = true;
                                             foundInThisOption = true;
-                                            for(let roleIndex = 0; roleIndex < cQ.options[optionIndex].roles.length; roleIndex++){
+                                            for (let roleIndex = 0; roleIndex < cQ.options[optionIndex].roles.length; roleIndex++) {
                                                 const cRole = await this.discordBot.guild?.roles.fetch(cQ.options[optionIndex].roles[roleIndex]);
                                                 const member = await this.discordBot.botUtils.fetchMember(user.id);
-                                                if(member && cRole) try{await member.roles.add(cRole)}catch(e){console.log(e)}
+                                                if (member && cRole) try { await member.roles.add(cRole) } catch (e) { console.log(e) }
                                             }
                                         }
-                                        if(foundInThisOption){
+                                        if (foundInThisOption) {
                                             const reactions = reaction.message.reactions.cache;
                                             if (reactions.size > 0) {
                                                 reactions.forEach(async rct => {
-                                                    if(rct.emoji.name !== reaction.emoji.name){
+                                                    if (rct.emoji.name !== reaction.emoji.name) {
                                                         rct.users.remove(user.id);
                                                     }
                                                 });
                                             }
-                                        }else{
-                                            for(let roleIndex = 0; roleIndex < cQ.options[optionIndex].roles.length; roleIndex++){
+                                        } else {
+                                            for (let roleIndex = 0; roleIndex < cQ.options[optionIndex].roles.length; roleIndex++) {
                                                 const cRole = await this.discordBot.guild?.roles.fetch(cQ.options[optionIndex].roles[roleIndex]);
                                                 const member = await this.discordBot.botUtils.fetchMember(user.id);
-                                                if(member && cRole) try{await member.roles.remove(cRole)}catch(e){}
+                                                if (member && cRole) try { await member.roles.remove(cRole) } catch (e) { }
                                             }
                                         }
                                     }
-                                    if(!found){
+                                    if (!found) {
                                         reaction.users.remove(user.id)
                                     }
                                 })()
                                 break;
                             case "multible":
-                                await (async()=>{
+                                await (async () => {
                                     let found = false;
-                                    for(let optionIndex = 0; optionIndex < cQ.options.length; optionIndex++){
+                                    for (let optionIndex = 0; optionIndex < cQ.options.length; optionIndex++) {
                                         let foundInThisOption = false;
-                                        if((cQ.options[optionIndex].icon.startsWith('<') && reaction.emoji.name === cQ.options[optionIndex].icon.split(':')[1]) || reaction.emoji.name === cQ.options[optionIndex].icon){
+                                        if ((cQ.options[optionIndex].icon.startsWith('<') && reaction.emoji.name === cQ.options[optionIndex].icon.split(':')[1]) || reaction.emoji.name === cQ.options[optionIndex].icon) {
                                             found = true;
                                             foundInThisOption = true;
-                                            for(let roleIndex = 0; roleIndex < cQ.options[optionIndex].roles.length; roleIndex++){
+                                            for (let roleIndex = 0; roleIndex < cQ.options[optionIndex].roles.length; roleIndex++) {
                                                 const cRole = await this.discordBot.guild?.roles.fetch(cQ.options[optionIndex].roles[roleIndex]);
                                                 const member = await this.discordBot.botUtils.fetchMember(user.id);
-                                                if(member && cRole) try{await member.roles.add(cRole)}catch(e){console.log(e)}
+                                                if (member && cRole) try { await member.roles.add(cRole) } catch (e) { console.log(e) }
                                             }
                                         }
                                     }
-                                    if(!found){
+                                    if (!found) {
                                         reaction.users.remove(user.id)
                                     }
                                 })()
@@ -147,20 +147,20 @@ export default class ButtonRoles{
 
         })
 
-        this.discordBot.addEventListener('event-messageCreate', async (message: Message)=>{
-            if(message.content.startsWith("!reactionRole")){
+        this.discordBot.addEventListener('event-messageCreate', async (message: Message) => {
+            if (message.content.startsWith("!reactionRole")) {
                 if (message.channel instanceof GuildChannel) await this.createReactionMessgage(message.channel, message.content.split(' ')[1]);
                 message.delete();
             }
         })
-        
+
     }
 
-    async createReactionMessgage(channel: GuildChannel, questionId: string){
-        if(!('send' in channel) || typeof channel.send != 'function' ) return
+    async createReactionMessgage(channel: GuildChannel, questionId: string) {
+        if (!('send' in channel) || typeof channel.send != 'function') return
         const cQ = this.config[questionId];
-        if(cQ){
-            if(!cQ.msgIds){
+        if (cQ) {
+            if (!cQ.msgIds) {
                 cQ.msgIds = [];
             }
 
@@ -175,7 +175,7 @@ export default class ButtonRoles{
             cQ.msgIds.push(message.id);
             this.safeConfig();
 
-            for(let i = 0; i < cQ.options.length; i++){
+            for (let i = 0; i < cQ.options.length; i++) {
                 console.log(cQ.options[i]);
                 message.react(cQ.options[i].icon);
             }
@@ -183,11 +183,11 @@ export default class ButtonRoles{
         }
     }
 
-    safeConfig(){
+    safeConfig() {
         fs.writeFileSync(this.discordBot.settings.plugins.ButtonRoles.pluginSettings.configPath, JSON.stringify(this.config, null, 2));
     }
 
-    draw(){
+    draw() {
 
     }
 }

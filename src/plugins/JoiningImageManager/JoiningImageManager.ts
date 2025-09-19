@@ -7,9 +7,9 @@ import puppeteer from 'puppeteer';
 import { AttachmentBuilder, GuildChannel, GuildMember } from 'discord.js';
 import { DiscordBot } from '../../DiscordBot';
 import path from 'path';
+import Plugin from '../../Plugin';
 
-export default class JoiningImageManager{
-    discordBot: DiscordBot;
+export default class JoiningImageManager extends Plugin {
     page: any;
     bannerPath?: string;
     sendBannerChannelId: string;
@@ -19,8 +19,9 @@ export default class JoiningImageManager{
     tempBannerFolderPath: string;
     tempUserFolderPath: string;
 
-    constructor(discordBot: DiscordBot){
-        this.discordBot = discordBot;
+    constructor(discordBot: DiscordBot) {
+        super(discordBot);
+
         this.page = null;
 
         this.bannerPath = this.discordBot.settings.plugins.JoiningEmbedManager.pluginSettings.bannerPath;
@@ -33,41 +34,41 @@ export default class JoiningImageManager{
 
 
         this.init();
-        
-        this.discordBot.addEventListener('event-guildMemberAdd',(member: GuildMember)=>{
-            if(this.sendWelcomeByMemberJoin){
+
+        this.discordBot.addEventListener('event-guildMemberAdd', (member: GuildMember) => {
+            if (this.sendWelcomeByMemberJoin) {
                 this.sendWelcomme(member);
             }
         })
-        
+
         console.log('JoiningBanner Manager Initialisiert.');
     }
 
-    async init(){
-        const browser = await puppeteer.launch({args: ['--no-sandbox']});
+    async init() {
+        const browser = await puppeteer.launch({ args: ['--no-sandbox'] });
         this.page = await browser.newPage();
     }
 
-    async sendWelcomme(member: GuildMember){
-        
+    async sendWelcomme(member: GuildMember) {
+
         const channel = await this.discordBot.guild?.channels.fetch(this.sendBannerChannelId);
-        if(!(channel instanceof GuildChannel) || !('send' in channel) || typeof channel.send !== 'function') return;
-        try{
+        if (!(channel instanceof GuildChannel) || !('send' in channel) || typeof channel.send !== 'function') return;
+        try {
             const bannerPath = await this.genBanner(member);
 
-            
+
             channel.send({
                 allowedMentions: { users: [member.id], repliedUser: true },
-                content: this.text, 
+                content: this.text,
                 files: [{ attachment: bannerPath }]
-            }).then(()=>{
-                try{
+            }).then(() => {
+                try {
                     fs.unlinkSync(this.tempBannerFolderPath);
-                } catch(err){
+                } catch (err) {
 
                 }
             })
-        }catch(err){
+        } catch (err) {
             console.log(err);
             channel.send({
                 content: this.text.replace(/{username}/g, this.discordBot.botUtils.getnick(member)).replace(/{userId}/g, member.user.id).replace(/{guildname}/g, member.guild.name),
@@ -75,9 +76,9 @@ export default class JoiningImageManager{
         }
     }
 
-    async genBanner(member: GuildMember){
+    async genBanner(member: GuildMember) {
 
-        const tempUserPath = path.join(this.tempUserFolderPath,`${short.generate()}.png`); 
+        const tempUserPath = path.join(this.tempUserFolderPath, `${short.generate()}.png`);
         this.discordBot.botUtils.downloadImage(this.discordBot.botUtils.getAvatar(member).replace(/\.webp$/g, '.png'), tempUserPath)
 
         const imageData = fs.readFileSync(tempUserPath).toString('base64');
@@ -168,7 +169,7 @@ export default class JoiningImageManager{
         }
 
         const id = short.generate();
-        const bannepath = path.join(this.tempBannerFolderPath,`${id}.png`);
+        const bannepath = path.join(this.tempBannerFolderPath, `${id}.png`);
         await element.screenshot({ path: bannepath });
 
         return bannepath;

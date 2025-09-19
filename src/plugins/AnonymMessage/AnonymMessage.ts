@@ -4,13 +4,11 @@ import { DiscordBot } from "../../DiscordBot.js";
 
 
 export default class AnonymMessage extends CommandPlugin {
-    discordBot: DiscordBot;
     allowedChannels: undefined | string[];
     sendInChannel: string;
 
     constructor(discordBot: DiscordBot) {
-        super(discordBot.settings.plugins.AnonymMessage);
-        this.discordBot = discordBot;
+        super(discordBot, discordBot.settings.plugins.AnonymMessage);
 
         this.allowedChannels = this.discordBot.settings.plugins.AnonymMessage.pluginSettings.allowedChannels;
         this.sendInChannel = this.discordBot.settings.plugins.AnonymMessage.pluginSettings.sendInChannel;

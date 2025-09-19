@@ -4,15 +4,13 @@ import { DiscordBot } from "../../DiscordBot.js";
 
 
 export default class BoosterColorRoles extends CommandPlugin {
-    discordBot: DiscordBot;
     boosterRoleId: string;
     boostChannelId: string;
     text: string[];
 
 
     constructor(discordBot: DiscordBot) {
-        super(discordBot.settings.plugins.BoosterColorRoles);
-        this.discordBot = discordBot;
+        super(discordBot, discordBot.settings.plugins.BoosterColorRoles);
 
         this.boosterRoleId = this.discordBot.settings.plugins.BoosterColorRoles.pluginSettings.boosterRoleId;
         this.boostChannelId = this.discordBot.settings.plugins.BoosterColorRoles.pluginSettings.boostChannelId;

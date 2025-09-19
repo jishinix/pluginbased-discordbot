@@ -13,9 +13,9 @@ export interface Position {
     y: number;
 };
 type pieceTypes = 'bb' | 'bw' | 'pb' | 'pw' | 'tb' | 'tw' | 'lb' | 'lw' | null;
-export type boardType = ( pieceTypes)[][];
+export type boardType = (pieceTypes)[][];
 
-interface TicTacChessGame{
+interface TicTacChessGame {
     id: string;
     playGround: boardType;
     players: string[];
@@ -28,14 +28,12 @@ interface TicTacChessGame{
     mode: 'drop' | 'selectPiece' | 'selectTravel' | 'selectPiece'
 }
 
-export default class TicTacChess extends CommandPlugin{
-    discordBot: DiscordBot;
-    games: {[key: string]: TicTacChessGame};
-    stringToEmojiMap: {[key: string]: string};
+export default class TicTacChess extends CommandPlugin {
+    games: { [key: string]: TicTacChessGame };
+    stringToEmojiMap: { [key: string]: string };
 
-    constructor(discordBot: DiscordBot){
-        super(discordBot.settings.plugins.TicTacChess)
-        this.discordBot = discordBot;
+    constructor(discordBot: DiscordBot) {
+        super(discordBot, discordBot.settings.plugins.TicTacChess)
         this.games = {};
 
         this.stringToEmojiMap = {
@@ -54,12 +52,12 @@ export default class TicTacChess extends CommandPlugin{
             'lw': this.discordBot.settings.plugins.TicTacChess.pluginSettings.ejlw,
         }
 
-        
+
         this.addCommand({
             data: new SlashCommandBuilder()
                 .setName('tictacchess-rules')
                 .setDescription('lasse dir die regeln zu TicTacChess erklären!'),
-            execute: async (discordBot: DiscordBot, interaction: CommandInteraction)=>{
+            execute: async (discordBot: DiscordBot, interaction: CommandInteraction) => {
                 const embed = this.discordBot.defaultEmbeds.getDefaultEmbed('none');
                 embed.setTitle('TicTacChess Rules');
                 const desc = [
@@ -75,7 +73,7 @@ export default class TicTacChess extends CommandPlugin{
                     `T: ${this.stringToEmojiMap['tb']} | ${this.stringToEmojiMap['tw']}`,
                 ]
                 embed.setDescription(desc.join('\n'));
-                interaction.reply({embeds: [embed], flags: MessageFlags.Ephemeral});
+                interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
             }
         })
 
@@ -87,229 +85,229 @@ export default class TicTacChess extends CommandPlugin{
                     option.setName('user')
                         .setDescription('Wenn du einen bestimmten nutzer einladen willst. Ansonsten kann jeder beitreten.')
                         .setRequired(false)),
-                execute: async (discordBot: DiscordBot, interaction: CommandInteraction)=>{
-                    const options = this.discordBot.botUtils.getOptionsObjectFromInteraction(interaction);
+            execute: async (discordBot: DiscordBot, interaction: CommandInteraction) => {
+                const options = this.discordBot.botUtils.getOptionsObjectFromInteraction(interaction);
 
-                    const id = short.generate().replace(/-/g, '|');
+                const id = short.generate().replace(/-/g, '|');
 
-                    this.games[id] = {
-                        id: id,
-                        playGround: [],
-                        players: [interaction.user.id],
-                        playerCooldownPieces: [null,null],
-                        nextMove: Math.floor(Math.random()*2),
-                        timer: null,
-                        message: null,
-                        piecePointSelect: null,
-                        pieceSelected: null,
-                        mode: 'selectPiece'
+                this.games[id] = {
+                    id: id,
+                    playGround: [],
+                    players: [interaction.user.id],
+                    playerCooldownPieces: [null, null],
+                    nextMove: Math.floor(Math.random() * 2),
+                    timer: null,
+                    message: null,
+                    piecePointSelect: null,
+                    pieceSelected: null,
+                    mode: 'selectPiece'
+                }
+                if (options.user) this.games[id].players.push(options.user);
+                this.resetCooldown(this.games[id]);
+                for (let y = 0; y < 4; y++) {
+                    this.games[id].playGround.push([]);
+                    for (let x = 0; x < 4; x++) {
+                        this.games[id].playGround[y].push(null);
                     }
-                    if(options.user) this.games[id].players.push(options.user);
-                    this.resetCooldown(this.games[id]);
-                    for(let y = 0; y < 4; y++){
-                        this.games[id].playGround.push([]);
-                        for(let x = 0; x < 4; x++){
-                            this.games[id].playGround[y].push(null);
-                        }
-                    }
+                }
 
-                    const { embeds, components } = await this.generateRtnMessageComponents(this.games[id]);
+                const { embeds, components } = await this.generateRtnMessageComponents(this.games[id]);
 
-                    const message = await interaction.reply({embeds: embeds, components: components});
-                    this.games[id].message = message;
-                },
+                const message = await interaction.reply({ embeds: embeds, components: components });
+                this.games[id].message = message;
+            },
         })
 
-        const nichtAmZugRtn = (interaction: ButtonInteraction)=>{
+        const nichtAmZugRtn = (interaction: ButtonInteraction) => {
             const embed = this.discordBot.defaultEmbeds.getDefaultEmbed('error');
             embed.setTitle('Du bist nicht am Zug');
-            interaction.reply({embeds: [embed], flags: MessageFlags.Ephemeral});
+            interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
         }
 
-        this.discordBot.botUtils.generateInteractionCb('buttons', 'selectBenchPiece', async (discordBot: DiscordBot, interaction: ButtonInteraction, options: string[])=>{
+        this.discordBot.botUtils.generateInteractionCb('buttons', 'selectBenchPiece', async (discordBot: DiscordBot, interaction: ButtonInteraction, options: string[]) => {
             const id: string = options[0];
             const piece: any = options[1];
             const game = this.games[id];
-            if(!game || !(game.message instanceof InteractionResponse)){
+            if (!game || !(game.message instanceof InteractionResponse)) {
                 const embed = this.discordBot.defaultEmbeds.getErrorEmbed();
-                interaction.reply({embeds: [embed], flags: MessageFlags.Ephemeral});
+                interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
                 return;
             }
 
-            if(interaction.user.id !== game.players[game.nextMove]){
+            if (interaction.user.id !== game.players[game.nextMove]) {
                 nichtAmZugRtn(interaction);
                 return;
             }
-            
+
             game.mode = 'drop';
             game.pieceSelected = piece;
 
             const { embeds, components } = await this.generateRtnMessageComponents(this.games[id]);
 
-            await interaction.update({embeds: embeds, components: components});
+            await interaction.update({ embeds: embeds, components: components });
             this.resetCooldown(game);
         })
 
 
-        this.discordBot.botUtils.generateInteractionCb('buttons', 'droppiece', async (discordBot: DiscordBot, interaction: ButtonInteraction, options: string[])=>{
+        this.discordBot.botUtils.generateInteractionCb('buttons', 'droppiece', async (discordBot: DiscordBot, interaction: ButtonInteraction, options: string[]) => {
             const id: string = options[0];
             const y: number = Number(options[1]);
             const x: number = Number(options[2]);
             const game = this.games[id];
-            if(!game || !(game.message instanceof InteractionResponse) || isNaN(y) || isNaN(x)){
+            if (!game || !(game.message instanceof InteractionResponse) || isNaN(y) || isNaN(x)) {
                 const embed = this.discordBot.defaultEmbeds.getErrorEmbed();
-                interaction.reply({embeds: [embed], flags: MessageFlags.Ephemeral});
+                interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
                 return;
             }
 
-            if(interaction.user.id !== game.players[game.nextMove]){
+            if (interaction.user.id !== game.players[game.nextMove]) {
                 nichtAmZugRtn(interaction);
                 return;
             }
 
 
-            if(game.playGround[y][x] !== null){
+            if (game.playGround[y][x] !== null) {
                 const embed = this.discordBot.defaultEmbeds.getDefaultEmbed('error');
                 embed.setTitle('dort kann deine Figut nicht hin');
-                interaction.reply({embeds: [embed], flags: MessageFlags.Ephemeral});
+                interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
                 return;
             }
-            
+
             game.playGround[y][x] = game.pieceSelected;
             game.mode = 'selectPiece';
             game.playerCooldownPieces[game.nextMove === 0 ? 1 : 0] = null;
             game.pieceSelected = null;
             game.nextMove++;
-            if(game.nextMove > 1) game.nextMove = 0;
+            if (game.nextMove > 1) game.nextMove = 0;
 
             const { embeds, components } = await this.generateRtnMessageComponents(this.games[id]);
 
-            await interaction.update({embeds: embeds, components: components});
+            await interaction.update({ embeds: embeds, components: components });
             this.resetCooldown(game);
         })
 
 
-        this.discordBot.botUtils.generateInteractionCb('buttons', 'selectPiece', async (discordBot: DiscordBot, interaction: ButtonInteraction, options: string[])=>{
+        this.discordBot.botUtils.generateInteractionCb('buttons', 'selectPiece', async (discordBot: DiscordBot, interaction: ButtonInteraction, options: string[]) => {
             const id: string = options[0];
             const y: number = Number(options[1]);
             const x: number = Number(options[2]);
             const game = this.games[id];
-            if(!game || !(game.message instanceof InteractionResponse) || isNaN(y) || isNaN(x)){
+            if (!game || !(game.message instanceof InteractionResponse) || isNaN(y) || isNaN(x)) {
                 const embed = this.discordBot.defaultEmbeds.getErrorEmbed();
-                interaction.reply({embeds: [embed], flags: MessageFlags.Ephemeral});
+                interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
                 return;
             }
 
-            if(interaction.user.id !== game.players[game.nextMove]){
+            if (interaction.user.id !== game.players[game.nextMove]) {
                 nichtAmZugRtn(interaction);
                 return;
             }
-            
+
             game.mode = 'selectTravel';
             game.pieceSelected = game.playGround[y][x];
-            game.piecePointSelect = {x: x, y: y};
+            game.piecePointSelect = { x: x, y: y };
 
             const { embeds, components } = await this.generateRtnMessageComponents(this.games[id]);
 
-            await interaction.update({embeds: embeds, components: components});
+            await interaction.update({ embeds: embeds, components: components });
             this.resetCooldown(game);
         })
 
 
-        this.discordBot.botUtils.generateInteractionCb('buttons', 'travel', async (discordBot: DiscordBot, interaction: ButtonInteraction, options: string[])=>{
+        this.discordBot.botUtils.generateInteractionCb('buttons', 'travel', async (discordBot: DiscordBot, interaction: ButtonInteraction, options: string[]) => {
             const id: string = options[0];
             const y: number = Number(options[1]);
             const x: number = Number(options[2]);
             const game = this.games[id];
-            if(!game || !(game.message instanceof InteractionResponse) || isNaN(y) || isNaN(x) || !game.piecePointSelect || !game.pieceSelected || !this.getPosiblePositions(game.piecePointSelect, game.pieceSelected, game.playGround, this.getColor(game)).includes(`${y}${x}`)){
+            if (!game || !(game.message instanceof InteractionResponse) || isNaN(y) || isNaN(x) || !game.piecePointSelect || !game.pieceSelected || !this.getPosiblePositions(game.piecePointSelect, game.pieceSelected, game.playGround, this.getColor(game)).includes(`${y}${x}`)) {
                 const embed = this.discordBot.defaultEmbeds.getErrorEmbed();
-                interaction.reply({embeds: [embed], flags: MessageFlags.Ephemeral});
+                interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
                 return;
             }
 
-            if(interaction.user.id !== game.players[game.nextMove]){
+            if (interaction.user.id !== game.players[game.nextMove]) {
                 nichtAmZugRtn(interaction);
                 return;
             }
-            
+
             game.mode = 'selectPiece';
             game.playGround[game.piecePointSelect.y][game.piecePointSelect.x] = null;
-            if(game.playGround[y][x]!== null) {
+            if (game.playGround[y][x] !== null) {
                 game.playerCooldownPieces[game.nextMove === 0 ? 1 : 0] = game.playGround[y][x];
-            }else{
+            } else {
                 game.playerCooldownPieces[game.nextMove === 0 ? 1 : 0] = null;
             }
             game.playGround[y][x] = game.pieceSelected;
             game.pieceSelected = null;
             game.piecePointSelect = null;
             game.nextMove++;
-            if(game.nextMove > 1) game.nextMove = 0;
+            if (game.nextMove > 1) game.nextMove = 0;
 
             const { embeds, components } = await this.generateRtnMessageComponents(this.games[id]);
 
-            await interaction.update({embeds: embeds, components: components});
+            await interaction.update({ embeds: embeds, components: components });
             this.resetCooldown(game);
         })
 
 
-        this.discordBot.botUtils.generateInteractionCb('buttons', 'default', async (discordBot: DiscordBot, interaction: ButtonInteraction, options: string[])=>{
+        this.discordBot.botUtils.generateInteractionCb('buttons', 'default', async (discordBot: DiscordBot, interaction: ButtonInteraction, options: string[]) => {
             const id: string = options[0];
             const game = this.games[id];
-            if(!game || !(game.message instanceof InteractionResponse)){
+            if (!game || !(game.message instanceof InteractionResponse)) {
                 const embed = this.discordBot.defaultEmbeds.getErrorEmbed();
-                interaction.reply({embeds: [embed], flags: MessageFlags.Ephemeral});
+                interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
                 return;
             }
 
-            if(interaction.user.id !== game.players[game.nextMove]){
+            if (interaction.user.id !== game.players[game.nextMove]) {
                 nichtAmZugRtn(interaction);
                 return;
             }
-            
+
             game.mode = 'selectPiece';
             game.pieceSelected = null;
             game.piecePointSelect = null;
 
             const { embeds, components } = await this.generateRtnMessageComponents(this.games[id]);
 
-            await interaction.update({embeds: embeds, components: components});
+            await interaction.update({ embeds: embeds, components: components });
             this.resetCooldown(game);
         })
 
-        
 
-        this.discordBot.botUtils.generateInteractionCb('buttons', 'ttcjoinGame', async (discordBot: DiscordBot, interaction: ButtonInteraction, options: string[])=>{
+
+        this.discordBot.botUtils.generateInteractionCb('buttons', 'ttcjoinGame', async (discordBot: DiscordBot, interaction: ButtonInteraction, options: string[]) => {
             const id: string = options[0];
             const game = this.games[id];
-            if(!game || !(game.message instanceof InteractionResponse)){
+            if (!game || !(game.message instanceof InteractionResponse)) {
                 const embed = this.discordBot.defaultEmbeds.getErrorEmbed();
-                interaction.reply({embeds: [embed], flags: MessageFlags.Ephemeral});
+                interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
                 return;
             }
-            if(game.players.length >= 2){
+            if (game.players.length >= 2) {
                 const embed = this.discordBot.defaultEmbeds.getDefaultEmbed('error');
                 embed.setTitle('Das spiel ist bereits voll');
-                interaction.reply({embeds: [embed], flags: MessageFlags.Ephemeral});
+                interaction.reply({ embeds: [embed], flags: MessageFlags.Ephemeral });
                 return;
             }
 
             game.players.push(interaction.user.id);
-            
+
             const { embeds, components } = await this.generateRtnMessageComponents(this.games[id]);
 
-            interaction.update({embeds: embeds, components: components});
+            interaction.update({ embeds: embeds, components: components });
             this.resetCooldown(game);
-            
+
             const channel = interaction.channel;
-            if(channel && 'send' in channel){
+            if (channel && 'send' in channel) {
                 const msg = await channel.send({
                     allowedMentions: { users: [game.players[0]], repliedUser: true },
                     content: `<@${game.players[0]}> Jemand ist deinem Spiel Beigetreten.`
-                   });
+                });
 
-                setTimeout(()=>{
-                    if(msg){
-                        msg.delete().catch((e)=>{})
+                setTimeout(() => {
+                    if (msg) {
+                        msg.delete().catch((e) => { })
                     }
                 }, 1000 * 5)
             }
@@ -319,29 +317,29 @@ export default class TicTacChess extends CommandPlugin{
 
     }
 
-    async generateRtnMessageComponents(game: TicTacChessGame){
+    async generateRtnMessageComponents(game: TicTacChessGame) {
         const members: GuildMember[] = [];
-        for(let i = 0; i < game.players.length; i++){
+        for (let i = 0; i < game.players.length; i++) {
             const member = await this.discordBot.botUtils.fetchMember(game.players[i]);
-            if(!member){
+            if (!member) {
                 const embed = this.discordBot.defaultEmbeds.getDefaultEmbed('error');
                 embed.setTitle('Spieler nicht gefunden');
-                return {embeds: [embed], components: []}
+                return { embeds: [embed], components: [] }
             }
             members.push(member);
         }
 
         const winner = this.getWinningLine(game);
 
-        
+
         const description: string[] = [];
-        for(let i = 0; i < 2; i++){
-            description.push(`Spieler ${i+1} (${i === 0 ? 'Weiß' : 'Schwarz'}): ${members[i] ? this.discordBot.botUtils.getnick(members[i]) : '???'}`);
+        for (let i = 0; i < 2; i++) {
+            description.push(`Spieler ${i + 1} (${i === 0 ? 'Weiß' : 'Schwarz'}): ${members[i] ? this.discordBot.botUtils.getnick(members[i]) : '???'}`);
         }
         if (game.players.length == 2 && winner === null) description.push(`Am zug: ${this.discordBot.botUtils.getnick(members[game.nextMove])}`);
         description.push(``);
 
-        if(winner) description.push(`# Gewinner: ${winner === 'w' ? this.discordBot.botUtils.getnick(members[0]) : this.discordBot.botUtils.getnick(members[1])}`);
+        if (winner) description.push(`# Gewinner: ${winner === 'w' ? this.discordBot.botUtils.getnick(members[0]) : this.discordBot.botUtils.getnick(members[1])}`);
 
         const components: ActionRowBuilder<ButtonBuilder>[] = [];
 
@@ -353,82 +351,82 @@ export default class TicTacChess extends CommandPlugin{
             `t${color}`,
         ];
 
-        if(winner === null){
-            if(game.players.length === 2){
-                
+        if (winner === null) {
+            if (game.players.length === 2) {
+
                 let travelPositions: string[] = [];
-                if(game.mode == 'selectTravel'){
+                if (game.mode == 'selectTravel') {
                     const figPos = game.piecePointSelect;
-                    if(!figPos || !game.pieceSelected) {
+                    if (!figPos || !game.pieceSelected) {
                         const embed = this.discordBot.defaultEmbeds.getErrorEmbed();
-                        return {embeds: [embed], components: []}
+                        return { embeds: [embed], components: [] }
                     };
                     travelPositions = this.getPosiblePositions(figPos, game.pieceSelected, game.playGround, color);
                 }
-    
-                for(let y = 0; y < game.playGround.length; y++){
+
+                for (let y = 0; y < game.playGround.length; y++) {
                     components.push(new ActionRowBuilder<ButtonBuilder>());
-                    for(let x = 0; x < game.playGround[y].length; x++){
+                    for (let x = 0; x < game.playGround[y].length; x++) {
                         const piece = game.playGround[y][x];
-                        if(piece !== null && piece?.endsWith(color)){
+                        if (piece !== null && piece?.endsWith(color)) {
                             const index = unusedPieces.indexOf(piece);
-                            unusedPieces.splice(index,1);
+                            unusedPieces.splice(index, 1);
                         }
-    
+
                         let buttonStyle;
                         let costumId = '';
                         let disabled;
                         let emojiName = 'none';
-    
-                        if(game.mode == 'selectPiece'){
-                            if(piece !== null && piece.endsWith(color)){
+
+                        if (game.mode == 'selectPiece') {
+                            if (piece !== null && piece.endsWith(color)) {
                                 buttonStyle = ButtonStyle.Success
                                 disabled = false;
                                 costumId = `selectPiece-${game.id}-${y}-${x}`;
-                            }else{
+                            } else {
                                 buttonStyle = ButtonStyle.Secondary
                                 disabled = true;
                                 costumId = `nothing-${game.id}-${y}-${x}`;
                             }
                         }
-    
-                        if(game.mode == 'drop'){
-                            if(piece === null){
+
+                        if (game.mode == 'drop') {
+                            if (piece === null) {
                                 buttonStyle = ButtonStyle.Success
                                 disabled = false;
                                 costumId = `droppiece-${game.id}-${y}-${x}`;
-                            }else{
+                            } else {
                                 buttonStyle = ButtonStyle.Secondary
                                 disabled = true;
                                 costumId = `nothing-${game.id}-${y}-${x}`;
                             }
                         }
-    
-                        if(game.mode == 'selectTravel'){
-                            if (!game.piecePointSelect) return{embeds: [], components: []};
-                            if(travelPositions.includes(`${y}${x}`)){
+
+                        if (game.mode == 'selectTravel') {
+                            if (!game.piecePointSelect) return { embeds: [], components: [] };
+                            if (travelPositions.includes(`${y}${x}`)) {
                                 buttonStyle = ButtonStyle.Success;
                                 costumId = `travel-${game.id}-${y}-${x}`;
                                 disabled = false;
-                            }else if(x === game.piecePointSelect.x && y === game.piecePointSelect?.y){
+                            } else if (x === game.piecePointSelect.x && y === game.piecePointSelect?.y) {
                                 buttonStyle = ButtonStyle.Primary;
                                 costumId = `default-${game.id}`;
                                 disabled = false;
-                            }else{
+                            } else {
                                 buttonStyle = ButtonStyle.Secondary;
                                 disabled = true;
                                 costumId = `nothing-${game.id}-${y}-${x}`;
                             }
                         }
 
-                        if(piece){
+                        if (piece) {
                             emojiName = piece;
-                            if(disabled && emojiName.endsWith('b')){
+                            if (disabled && emojiName.endsWith('b')) {
                                 emojiName += 'l'
                             }
                         }
-                        
-    
+
+
                         components[y].addComponents(
                             new ButtonBuilder()
                                 .setCustomId(costumId)
@@ -438,42 +436,42 @@ export default class TicTacChess extends CommandPlugin{
                         );
                     }
                 }
-    
-                for(let i = 0; i < unusedPieces.length; i++){
-                    if(i == 0) components.push(new ActionRowBuilder<ButtonBuilder>);
-                    
-                    let buttonStyle =  ButtonStyle.Danger;
+
+                for (let i = 0; i < unusedPieces.length; i++) {
+                    if (i == 0) components.push(new ActionRowBuilder<ButtonBuilder>);
+
+                    let buttonStyle = ButtonStyle.Danger;
                     let disabled = false;
                     let costumId = ''
-                    if(game.mode == 'selectPiece'){
+                    if (game.mode == 'selectPiece') {
                         costumId = `selectBenchPiece-${game.id}-${unusedPieces[i]}`
                     }
-                    if(game.mode == 'drop'){
-                        if(game.pieceSelected == unusedPieces[i]){
+                    if (game.mode == 'drop') {
+                        if (game.pieceSelected == unusedPieces[i]) {
                             buttonStyle = ButtonStyle.Primary;
                             disabled = false;
                             costumId = `default-${game.id}-${i}`
-                        }else{
+                        } else {
                             costumId = `selectBenchPiece-${game.id}-${unusedPieces[i]}`
                         }
-                    }else if(game.mode == 'selectTravel'){
+                    } else if (game.mode == 'selectTravel') {
                         disabled = true;
                         costumId = `nothing-bench-${game.id}-${i}`
                     }
                     let emojiName = 'none';
-                    if(unusedPieces[i]){
+                    if (unusedPieces[i]) {
                         emojiName = unusedPieces[i];
-                        if(disabled && emojiName.endsWith('b')){
+                        if (disabled && emojiName.endsWith('b')) {
                             emojiName += 'l'
                         }
                     }
 
-                    if(!disabled){
-                        if(game.playerCooldownPieces[game.nextMove] === unusedPieces[i]){
+                    if (!disabled) {
+                        if (game.playerCooldownPieces[game.nextMove] === unusedPieces[i]) {
                             disabled = true;
                         }
                     }
-    
+
                     components[4].addComponents(
                         new ButtonBuilder()
                             .setCustomId(costumId)
@@ -482,7 +480,7 @@ export default class TicTacChess extends CommandPlugin{
                             .setDisabled(disabled)
                     );
                 }
-            }else{
+            } else {
                 components.push(new ActionRowBuilder<ButtonBuilder>().addComponents(
                     new ButtonBuilder()
                         .setCustomId(`ttcjoinGame-${game.id}`)
@@ -490,14 +488,14 @@ export default class TicTacChess extends CommandPlugin{
                         .setLabel('Spiel beitreten')
                 ))
             }
-        }else{
+        } else {
 
             const table: string[] = [];
-            for(let y = 0; y < game.playGround.length; y++){
+            for (let y = 0; y < game.playGround.length; y++) {
                 let row: string[] = [];
-                for(let x = 0; x < game.playGround[y].length; x++){
+                for (let x = 0; x < game.playGround[y].length; x++) {
                     const piece = game.playGround[y][x];
-                    if(!piece) row.push(this.stringToEmojiMap['none']);
+                    if (!piece) row.push(this.stringToEmojiMap['none']);
                     else row.push(this.stringToEmojiMap[piece])
                 }
                 table.push(row.join(' | '));
@@ -505,10 +503,10 @@ export default class TicTacChess extends CommandPlugin{
             description.push(table.join('\n------------------\n'))
 
             const message = game.message;
-            setTimeout(()=>{
-                if(message){
-                    message.delete().catch(e=>{});
-                }else{
+            setTimeout(() => {
+                if (message) {
+                    message.delete().catch(e => { });
+                } else {
                     console.log(message)
                 }
             }, 1000 * 20)
@@ -522,14 +520,14 @@ export default class TicTacChess extends CommandPlugin{
         return { embeds: [embed], components: components };
     }
 
-    getColor(game: TicTacChessGame){
+    getColor(game: TicTacChessGame) {
         return game.nextMove === 0 ? 'w' : 'b';
     }
 
-    getPosiblePositions(point: Position, name: string, board: boardType, color: string){
-        const thirstLetter = name.slice(0,1);
+    getPosiblePositions(point: Position, name: string, board: boardType, color: string) {
+        const thirstLetter = name.slice(0, 1);
         let piece: ChessPiece | null = null;
-        switch (thirstLetter){
+        switch (thirstLetter) {
             case 'b':
                 piece = new Bauer(point, board, color)
                 break;
@@ -544,7 +542,7 @@ export default class TicTacChess extends CommandPlugin{
                 break;
         }
 
-        if(piece){
+        if (piece) {
             return piece.getAllValidMovesAsStringArray();
         }
         return [];
@@ -554,11 +552,11 @@ export default class TicTacChess extends CommandPlugin{
         const board = game.playGround;
         const rows = board.length;
         const cols = board[0].length;
-    
+
         // Hilfsfunktion, um das Endzeichen eines Strings zu bekommen
         const getLastChar = (cell: string | null): string | null =>
             cell ? cell.slice(-1) : null;
-    
+
         // Prüfe Zeilen
         for (let y = 0; y < rows; y++) {
             for (let x = 0; x <= cols - 4; x++) {
@@ -568,7 +566,7 @@ export default class TicTacChess extends CommandPlugin{
                 }
             }
         }
-    
+
         // Prüfe Spalten
         for (let x = 0; x < cols; x++) {
             for (let y = 0; y <= rows - 4; y++) {
@@ -578,7 +576,7 @@ export default class TicTacChess extends CommandPlugin{
                 }
             }
         }
-    
+
         // Prüfe diagonale (\ Richtung)
         for (let y = 0; y <= rows - 4; y++) {
             for (let x = 0; x <= cols - 4; x++) {
@@ -588,7 +586,7 @@ export default class TicTacChess extends CommandPlugin{
                 }
             }
         }
-    
+
         // Prüfe diagonale (/ Richtung)
         for (let y = 3; y < rows; y++) {
             for (let x = 0; x <= cols - 4; x++) {
@@ -599,27 +597,27 @@ export default class TicTacChess extends CommandPlugin{
             }
         }
 
-    
+
         return null; // Kein Gewinn gefunden
     }
-    
 
-    resetCooldown(game: TicTacChessGame){
-        if(game.timer){
+
+    resetCooldown(game: TicTacChessGame) {
+        if (game.timer) {
             clearTimeout(game.timer);
         }
-        game.timer = setTimeout(()=>{
-            if(this.games[game.id]){
-                const message = this.games[game.id].message; 
-                if(message){
+        game.timer = setTimeout(() => {
+            if (this.games[game.id]) {
+                const message = this.games[game.id].message;
+                if (message) {
                     const embed = this.discordBot.defaultEmbeds.getDefaultEmbed('none');
                     embed.setTitle('Abgelaufen');
                     embed.setDescription(`Das spiel ist nach 10 Minuten nicht interagieren abgelaufen.`);
-    
-                    message.edit({embeds: [embed], components: []});
+
+                    message.edit({ embeds: [embed], components: [] });
                 }
-                setTimeout(()=>{
-                    if(message){
+                setTimeout(() => {
+                    if (message) {
                         message.delete();
                     }
                 }, 1000 * 20)

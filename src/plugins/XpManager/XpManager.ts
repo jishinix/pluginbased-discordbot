@@ -17,7 +17,6 @@ interface roleSettings {
 
 
 export default class XpManager extends CommandPlugin {
-    discordBot: DiscordBot;
     levelUpChannal: string;
     dontTracVoices: string[];
     dontTracChat: string[];
@@ -36,8 +35,7 @@ export default class XpManager extends CommandPlugin {
 
 
     constructor(discordBot: DiscordBot) {
-        super(discordBot.settings.plugins.XpManager);
-        this.discordBot = discordBot;
+        super(discordBot, discordBot.settings.plugins.XpManager);
 
         this.levelUpChannal = discordBot.settings.plugins.XpManager.pluginSettings.levelUpChannal;
         this.dontTracVoices = discordBot.settings.plugins.XpManager.pluginSettings.dontTracVoices;

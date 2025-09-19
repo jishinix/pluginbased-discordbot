@@ -1,13 +1,13 @@
 import fs from "fs";
 import { AttachmentBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder, Message, MessageCreateOptions, MessageEditOptions } from 'discord.js';
 import { DiscordBot } from "../../DiscordBot";
+import Plugin from "../../Plugin";
 
-export default class Embedtexter {
-    discordBot: DiscordBot;
+export default class Embedtexter extends Plugin {
     baseEmbedPath: string;
 
     constructor(discordBot: DiscordBot) {
-        this.discordBot = discordBot;
+        super(discordBot);
 
         this.baseEmbedPath = this.discordBot.settings.plugins.Embedtexter.pluginSettings.baseEmbedPath;
 

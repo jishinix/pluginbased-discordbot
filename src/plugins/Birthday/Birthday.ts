@@ -4,11 +4,9 @@ import { DiscordBot } from "../../DiscordBot.js";
 import { CommandPlugin } from "../../CommandPlugin.js";
 
 export default class Birthday extends CommandPlugin {
-    discordBot: DiscordBot;
 
-    constructor(discordBot: DiscordBot){
-        super(discordBot.settings.plugins.Birthday);
-        this.discordBot = discordBot;
+    constructor(discordBot: DiscordBot) {
+        super(discordBot, discordBot.settings.plugins.Birthday);
 
 
         this.addCommand({
@@ -19,50 +17,50 @@ export default class Birthday extends CommandPlugin {
                     option.setName('user')
                         .setDescription('Von wem Möchtest du denn Geburtstag wissen?')
                         .setRequired(false))
-                
+
                 .setDMPermission(false),
-                execute: async (discordBot: DiscordBot, interaction: CommandInteraction)=>{
+            execute: async (discordBot: DiscordBot, interaction: CommandInteraction) => {
 
-                    const options = this.discordBot.botUtils.getOptionsObjectFromInteraction(interaction)
-        
-                    let id = '';
-                    if(options.user){
-                        id = options.user;
-                    }else{
-                        id = interaction.user.id;
-                    }
+                const options = this.discordBot.botUtils.getOptionsObjectFromInteraction(interaction)
 
-                    const bday = await this.getBirthDay(id);
-                    if(!bday){
-                        const embed = discordBot.defaultEmbeds.getDefaultEmbed('error');
-                        embed.setTitle(`Kein Geburtstag bekannt.`);
-                        embed.setDescription(`Leider ist mir kein Geburtstag über diesen User bekannt.\nVerwende den Befehl **/remember-birthday** um deinen Geburtstag zu setzen.`);
-                        interaction.reply({embeds: [embed], ephemeral: true});
-                        return
-                    }
+                let id = '';
+                if (options.user) {
+                    id = options.user;
+                } else {
+                    id = interaction.user.id;
+                }
 
-                    
-                    const bdayStr = this.convertDateToStr(bday)
-                    const embed = discordBot.defaultEmbeds.getDefaultEmbed('info');
-                    embed.setTitle(`Geburtstag`);
-                    const tage = Math.floor(this.differenzZumNaechstenGeburtstag(bday)/1000/60/60/24);
-                    embed.setDescription(`**Von:**<@${id}>\n**Alter:** ${this.calcAge(bday)}\n**Geburtstag:** ${bdayStr}\n${tage == 365 ? '**HEUTE!**' : `**In: ** ${tage > 1 ? `${tage} Tagen` : 'Einem Tag'}`}`);
-                    interaction.reply({embeds: [embed], ephemeral: true});
-                },
+                const bday = await this.getBirthDay(id);
+                if (!bday) {
+                    const embed = discordBot.defaultEmbeds.getDefaultEmbed('error');
+                    embed.setTitle(`Kein Geburtstag bekannt.`);
+                    embed.setDescription(`Leider ist mir kein Geburtstag über diesen User bekannt.\nVerwende den Befehl **/remember-birthday** um deinen Geburtstag zu setzen.`);
+                    interaction.reply({ embeds: [embed], ephemeral: true });
+                    return
+                }
+
+
+                const bdayStr = this.convertDateToStr(bday)
+                const embed = discordBot.defaultEmbeds.getDefaultEmbed('info');
+                embed.setTitle(`Geburtstag`);
+                const tage = Math.floor(this.differenzZumNaechstenGeburtstag(bday) / 1000 / 60 / 60 / 24);
+                embed.setDescription(`**Von:**<@${id}>\n**Alter:** ${this.calcAge(bday)}\n**Geburtstag:** ${bdayStr}\n${tage == 365 ? '**HEUTE!**' : `**In: ** ${tage > 1 ? `${tage} Tagen` : 'Einem Tag'}`}`);
+                interaction.reply({ embeds: [embed], ephemeral: true });
+            },
         })
 
         this.addCommand({
             data: new SlashCommandBuilder()
                 .setName('birthday-help')
                 .setDescription('Zeigt alle Birthday Befehle an.'),
-                execute: async (discordBot: DiscordBot, interaction: CommandInteraction)=>{
-        
-                    const embed = discordBot.defaultEmbeds.getDefaultEmbed('none');
-                    embed.setTitle('Birthday Help')
-                    embed.setDescription('**/birthday-remember**: Fügt euren Geburtstag hinzu.\n**/birthday-forget**: Entfernt euren Geburtstagseintrag.\n**/birthdays-next**: Zeigt euch die nächsten 10 Geburtstage an.\n**/birthday**: Zeigt dir deinen Geburstag oder den eines anderen Crewmitglieds an.')
-                    
-                    interaction.reply({embeds: [embed]});
-                },
+            execute: async (discordBot: DiscordBot, interaction: CommandInteraction) => {
+
+                const embed = discordBot.defaultEmbeds.getDefaultEmbed('none');
+                embed.setTitle('Birthday Help')
+                embed.setDescription('**/birthday-remember**: Fügt euren Geburtstag hinzu.\n**/birthday-forget**: Entfernt euren Geburtstagseintrag.\n**/birthdays-next**: Zeigt euch die nächsten 10 Geburtstage an.\n**/birthday**: Zeigt dir deinen Geburstag oder den eines anderen Crewmitglieds an.')
+
+                interaction.reply({ embeds: [embed] });
+            },
         })
 
         this.addCommand({
@@ -73,26 +71,26 @@ export default class Birthday extends CommandPlugin {
                     option.setName('datum')
                         .setDescription('Dein Datum (format: 27.12.1999)')
                         .setRequired(true)),
-                execute: async (discordBot: DiscordBot, interaction: CommandInteraction)=>{
-                    
-                    const options = this.discordBot.botUtils.getOptionsObjectFromInteraction(interaction)
-        
-                    const aDate = options.datum.split('.');
-                    if(aDate.length !== 3){
-                        sendInvalidDate();
-                        return;
-                    }
-                    const day = aDate[0];
-                    const month = aDate[1];
-                    const year = aDate[2];
-        
-                    const date = new Date(`${year}-${month}-${day}`);
-                    if(!isDateValid(date)){
-                        sendInvalidDate();
-                        return;
-                    }
-        
-                    const sql = `
+            execute: async (discordBot: DiscordBot, interaction: CommandInteraction) => {
+
+                const options = this.discordBot.botUtils.getOptionsObjectFromInteraction(interaction)
+
+                const aDate = options.datum.split('.');
+                if (aDate.length !== 3) {
+                    sendInvalidDate();
+                    return;
+                }
+                const day = aDate[0];
+                const month = aDate[1];
+                const year = aDate[2];
+
+                const date = new Date(`${year}-${month}-${day}`);
+                if (!isDateValid(date)) {
+                    sendInvalidDate();
+                    return;
+                }
+
+                const sql = `
                         DELETE FROM st_bd_birthdays WHERE BD_US_ID = ? AND BD_SR_ID = ?;
                         INSERT INTO st_bd_birthdays (
                             BD_ID,
@@ -102,97 +100,97 @@ export default class Birthday extends CommandPlugin {
                         ) VALUES (
                             NULL,
                             ?,
-                            '${date.getFullYear()}-${date.getMonth()+1}-${date.getDate()}',
+                            '${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}',
                             ?
                         )
                     `;
-        
-                    discordBot.db.query(sql, [interaction.user.id, discordBot.guild?.id, interaction.user.id, discordBot.guild?.id]);
-                    
-                    const embed = discordBot.defaultEmbeds.getDefaultEmbed('ready');
-                    embed.setTitle('Geburtstag gesetzt!');
-                    embed.setDescription(`Dein Geburtstag wurde für denn ${this.convertDateToStr(date)} eingetragen`);
-                    interaction.reply({embeds: [embed], ephemeral: true});
-        
-                    function isDateValid(date: Date) {
-                        return !isNaN(date.getTime());
-                    }
-        
-                    function sendInvalidDate(){
-                        const embed = discordBot.defaultEmbeds.getDefaultEmbed('error');
-                        embed.setTitle('Invalides Datum!');
-                        embed.setDescription(`Dieses Datum ist invalide. Bitte gib dein Geburtsdatum im folgendem Format an: dd.mm.yyyy also z.B.: 27.12.1999`);
-                        interaction.reply({embeds: [embed], ephemeral: true});
-                    }
-                },
+
+                discordBot.db.query(sql, [interaction.user.id, discordBot.guild?.id, interaction.user.id, discordBot.guild?.id]);
+
+                const embed = discordBot.defaultEmbeds.getDefaultEmbed('ready');
+                embed.setTitle('Geburtstag gesetzt!');
+                embed.setDescription(`Dein Geburtstag wurde für denn ${this.convertDateToStr(date)} eingetragen`);
+                interaction.reply({ embeds: [embed], ephemeral: true });
+
+                function isDateValid(date: Date) {
+                    return !isNaN(date.getTime());
+                }
+
+                function sendInvalidDate() {
+                    const embed = discordBot.defaultEmbeds.getDefaultEmbed('error');
+                    embed.setTitle('Invalides Datum!');
+                    embed.setDescription(`Dieses Datum ist invalide. Bitte gib dein Geburtsdatum im folgendem Format an: dd.mm.yyyy also z.B.: 27.12.1999`);
+                    interaction.reply({ embeds: [embed], ephemeral: true });
+                }
+            },
         })
 
         this.addCommand({
             data: new SlashCommandBuilder()
                 .setName('birthday-remove')
                 .setDescription('Entferne deinen Geburtstag.'),
-                execute: async (discordBot: DiscordBot, interaction: CommandInteraction)=>{
-                    const sql = `
+            execute: async (discordBot: DiscordBot, interaction: CommandInteraction) => {
+                const sql = `
                         DELETE FROM st_bd_birthdays WHERE BD_US_ID = ? AND BD_SR_ID = ?;
                     `;
-        
-                    discordBot.db.query(sql, [interaction.user.id, discordBot.guild?.id]);
-                    
-                    const embed = discordBot.defaultEmbeds.getDefaultEmbed('ready');
-                    embed.setTitle('Geburtstag gelöscht!');
-                    embed.setDescription(`Dein Geburtstag wurde entfernt.`);
-                    interaction.reply({embeds: [embed], ephemeral: true});
-        
-                },
+
+                discordBot.db.query(sql, [interaction.user.id, discordBot.guild?.id]);
+
+                const embed = discordBot.defaultEmbeds.getDefaultEmbed('ready');
+                embed.setTitle('Geburtstag gelöscht!');
+                embed.setDescription(`Dein Geburtstag wurde entfernt.`);
+                interaction.reply({ embeds: [embed], ephemeral: true });
+
+            },
         })
 
         this.addCommand({
             data: new SlashCommandBuilder()
                 .setName('birthdays-next')
                 .setDescription('Listet die nächsten 10 Geburtstage auf.'),
-                execute: async (discordBot: DiscordBot, interaction: CommandInteraction)=>{
-        
-                    const sql = `
+            execute: async (discordBot: DiscordBot, interaction: CommandInteraction) => {
+
+                const sql = `
                         SELECT * FROM st_bd_birthdays WHERE BD_SR_ID = ?;
                     `;
-        
-                    const rtn = (await discordBot.db.query(sql, [discordBot.guild?.id]))[0];
-        
-                    const geburtstage = [];
-        
-                    for(let i = 0; i < rtn.length; i++){
-                        geburtstage.push({day: new Date(rtn[i].BD_DATE_STRING), user: rtn[i].BD_US_ID});
-                    }
-                    
-                    geburtstage.sort((a, b) => {
-                        return this.differenzZumNaechstenGeburtstag(a.day) - this.differenzZumNaechstenGeburtstag(b.day);
-                    });
-        
-                    let cValue = ``;
-                    let last = ``;
-                    let fields = [];
-                    for(let i = 0; i < 10 && i < geburtstage.length; i++){
-                        const string = this.convertDateToStr(geburtstage[i].day)
-                        if(last !== string){
-                            if(last !== ''){
-                                fields.push({name: last, value: cValue})
-                            }
-                            cValue = ``;
-                            last = string;
+
+                const rtn = (await discordBot.db.query(sql, [discordBot.guild?.id]))[0];
+
+                const geburtstage = [];
+
+                for (let i = 0; i < rtn.length; i++) {
+                    geburtstage.push({ day: new Date(rtn[i].BD_DATE_STRING), user: rtn[i].BD_US_ID });
+                }
+
+                geburtstage.sort((a, b) => {
+                    return this.differenzZumNaechstenGeburtstag(a.day) - this.differenzZumNaechstenGeburtstag(b.day);
+                });
+
+                let cValue = ``;
+                let last = ``;
+                let fields = [];
+                for (let i = 0; i < 10 && i < geburtstage.length; i++) {
+                    const string = this.convertDateToStr(geburtstage[i].day)
+                    if (last !== string) {
+                        if (last !== '') {
+                            fields.push({ name: last, value: cValue })
                         }
-                        cValue += `<@${geburtstage[i].user}> (${this.calcAge(geburtstage[i].day)})\n`
+                        cValue = ``;
+                        last = string;
                     }
-                    if(last !== ''){
-                        fields.push({name: last, value: cValue})
-                    }
-        
-                    
-                    const embed = discordBot.defaultEmbeds.getDefaultEmbed('info');
-                    embed.setTitle('Geburtstagsliste!');
-                    embed.addFields(fields);
-                    interaction.reply({embeds: [embed], ephemeral: true});
-                    
-                },
+                    cValue += `<@${geburtstage[i].user}> (${this.calcAge(geburtstage[i].day)})\n`
+                }
+                if (last !== '') {
+                    fields.push({ name: last, value: cValue })
+                }
+
+
+                const embed = discordBot.defaultEmbeds.getDefaultEmbed('info');
+                embed.setTitle('Geburtstagsliste!');
+                embed.addFields(fields);
+                interaction.reply({ embeds: [embed], ephemeral: true });
+
+            },
         })
 
 
@@ -203,80 +201,80 @@ export default class Birthday extends CommandPlugin {
         const removeRoleTime = this.discordBot.settings.plugins.Birthday.pluginSettings.removeRoleTime;
         const sendBirthdayMessageTime = this.discordBot.settings.plugins.Birthday.pluginSettings.sendBirthdayMessageTime;
 
-        if(bChannelId && sendBirthdayMessageTime) {
+        if (bChannelId && sendBirthdayMessageTime) {
             const aSendBirthdayMessageTime: string[] = sendBirthdayMessageTime.split(':');
-            
-            this.discordBot.botUtils.scheduleFunctionAtTime(async ()=>{
+
+            this.discordBot.botUtils.scheduleFunctionAtTime(async () => {
                 const now = new Date();
-                
+
                 const sql = `
-                    SELECT * FROM st_bd_birthdays where BD_DATE_STRING like '%-${now.getMonth()+1}-${now.getDate()}' AND BD_SR_ID = ?;
+                    SELECT * FROM st_bd_birthdays where BD_DATE_STRING like '%-${now.getMonth() + 1}-${now.getDate()}' AND BD_SR_ID = ?;
                 `;
 
                 const rtn = (await discordBot.db.query(sql, [guildId]))[0];
-                
+
                 const channel = await this.discordBot.guild?.channels.fetch(bChannelId);
 
-                if(!channel || channel.type !== ChannelType.GuildText){
+                if (!channel || channel.type !== ChannelType.GuildText) {
                     console.error('Birthday log | Channel nicht gefunden.');
                     return;
                 }
-                
-                for(let i = 0; i < rtn.length; i++){                    
+
+                for (let i = 0; i < rtn.length; i++) {
                     const bday = new Date(rtn[i].BD_DATE_STRING);
                     await channel.send({
                         content: `Herzlichen Glückwunsch <@${rtn[i].BD_US_ID}> du bist heute ${this.calcAge(bday)} geworden, alles Gute zum Geburtstag 🎂`,
                         allowedMentions: { repliedUser: true },
                     })
                 }
-                
+
             }, Number(aSendBirthdayMessageTime[0]), Number(aSendBirthdayMessageTime[1]), Number(aSendBirthdayMessageTime[2]))
         }
 
-        if(giveRoleTime && removeRoleTime && bRoleId){
+        if (giveRoleTime && removeRoleTime && bRoleId) {
             const aGiveRoleTime: string[] = giveRoleTime.split(':');
             const aRemoveRoleTime: string[] = giveRoleTime.split(':');
 
-            this.discordBot.botUtils.scheduleFunctionAtTime(async ()=>{
+            this.discordBot.botUtils.scheduleFunctionAtTime(async () => {
 
                 const now = new Date();
-                
+
                 const sql = `
-                    SELECT * FROM st_bd_birthdays where BD_DATE_STRING like '%-${now.getMonth()+1}-${now.getDate()}' AND BD_SR_ID = ?;
+                    SELECT * FROM st_bd_birthdays where BD_DATE_STRING like '%-${now.getMonth() + 1}-${now.getDate()}' AND BD_SR_ID = ?;
                 `;
 
                 const rtn = (await discordBot.db.query(sql, [guildId]))[0];
-                
+
                 const role = await this.discordBot.guild?.roles.fetch(bRoleId);
-                if(!role){
+                if (!role) {
                     console.error('Birthday log | Rolle nicht gefunden.');
                     return;
                 }
-                for(let i = 0; i < rtn.length; i++){
+                for (let i = 0; i < rtn.length; i++) {
                     const member = await this.discordBot.guild?.members.fetch(rtn[i].BD_US_ID)
-                    if(!member) continue;
+                    if (!member) continue;
                     await member.roles.add(role);
                 }
             }, Number(aGiveRoleTime[0]), Number(aGiveRoleTime[1]), Number(aGiveRoleTime[2]))
 
-            this.discordBot.botUtils.scheduleFunctionAtTime(async ()=>{
+            this.discordBot.botUtils.scheduleFunctionAtTime(async () => {
                 const now = new Date();
-                
+
 
                 const sql = `
-                    SELECT * FROM st_bd_birthdays where BD_DATE_STRING like '%-${now.getMonth()+1}-${now.getDate()}' AND BD_SR_ID = ?;
+                    SELECT * FROM st_bd_birthdays where BD_DATE_STRING like '%-${now.getMonth() + 1}-${now.getDate()}' AND BD_SR_ID = ?;
                 `;
 
                 const rtn = (await discordBot.db.query(sql, [guildId]))[0];
-                
+
                 const role = await this.discordBot.guild?.roles.fetch(bRoleId);
-                if(!role){
+                if (!role) {
                     console.error('Birthday log | Rolle nicht gefunden.');
                     return;
                 }
-                for(let i = 0; i < rtn.length; i++){
+                for (let i = 0; i < rtn.length; i++) {
                     const member = await this.discordBot.guild?.members.fetch(rtn[i].BD_US_ID)
-                    if(!member) continue;
+                    if (!member) continue;
                     await member.roles.remove(role);
                 }
             }, Number(aRemoveRoleTime[0]), Number(aRemoveRoleTime[1]), Number(aRemoveRoleTime[2]))
@@ -285,7 +283,7 @@ export default class Birthday extends CommandPlugin {
 
 
 
-        discordBot.addEventListener('event-guildMemberRemove', (member: GuildMember)=>{
+        discordBot.addEventListener('event-guildMemberRemove', (member: GuildMember) => {
             const sql = `
                 DELETE FROM st_bd_birthdays WHERE BD_US_ID = ? AND BD_SR_ID = ?;
             `;
@@ -294,16 +292,16 @@ export default class Birthday extends CommandPlugin {
         })
     }
 
-    async getBirthDay(userId: string){
-        
-        
+    async getBirthDay(userId: string) {
+
+
         const sql = `
             SELECT * FROM st_bd_birthdays where BD_US_ID = ? AND BD_SR_ID = ? LIMIT 1;
         `;
 
         const rtn = (await this.discordBot.db.query(sql, [userId, this.discordBot.guild?.id]))[0];
 
-        if(rtn.length == 0){
+        if (rtn.length == 0) {
             return null;
         }
 
@@ -312,10 +310,10 @@ export default class Birthday extends CommandPlugin {
         return bday;
     }
 
-    convertDateToStr(date: Date){
+    convertDateToStr(date: Date) {
 
         let month = '';
-        switch(date.getMonth()+1){
+        switch (date.getMonth() + 1) {
             case 1:
                 month = "Januar";
                 break;
@@ -328,7 +326,7 @@ export default class Birthday extends CommandPlugin {
             case 4:
                 month = "April";
                 break;
-            case 5: 
+            case 5:
                 month = "Mai";
                 break;
             case 6:
@@ -337,7 +335,7 @@ export default class Birthday extends CommandPlugin {
             case 7:
                 month = "Juli";
                 break;
-            case 8: 
+            case 8:
                 month = "August";
                 break;
             case 9:
@@ -361,17 +359,17 @@ export default class Birthday extends CommandPlugin {
     calcAge(geburtstag: Date) {
         const geburtsdatum = new Date(geburtstag);
         const heute = new Date();
-    
+
         let alter = heute.getFullYear() - geburtsdatum.getFullYear();
-    
+
         const hatGeburtstagBereitsErfolgt =
             heute.getMonth() > geburtsdatum.getMonth() ||
             (heute.getMonth() === geburtsdatum.getMonth() && heute.getDate() >= geburtsdatum.getDate());
-    
+
         if (!hatGeburtstagBereitsErfolgt) {
             alter--;
         }
-    
+
         return alter;
     }
 
